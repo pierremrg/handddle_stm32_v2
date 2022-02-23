@@ -1,0 +1,4 @@
+HeaterFan.c:11:6:set_HeaterFan_pwm	24	static
+HeaterFan.c:18:5:getHeaterFrequency	16	static
+HeaterFan.c:30:5:getHeaterRPM	16	static
+HeaterFan.c:37:6:set_heater	16	static

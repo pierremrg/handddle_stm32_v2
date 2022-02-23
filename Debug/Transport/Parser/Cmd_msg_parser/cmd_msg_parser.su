@@ -1,0 +1,9 @@
+cmd_msg_parser.c:17:6:build_ack_msg_cmd	24	static
+cmd_msg_parser.c:28:6:send_cmd_ack	16	static
+cmd_msg_parser.c:33:6:send_cmd_ack_with_value	16	static
+cmd_msg_parser.c:38:6:send_cmd_nok	16	static
+cmd_msg_parser.c:44:6:parser_cmd_udpate_watchdog	16	static
+cmd_msg_parser.c:48:6:parser_cmd_force_reset	16	static
+cmd_msg_parser.c:52:6:parser_cmd_cooling_fan	24	static
+cmd_msg_parser.c:61:6:parser_cmd_heater_fan	24	static
+cmd_msg_parser.c:77:6:parser_cmd	24	static

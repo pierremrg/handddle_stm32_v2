@@ -1,0 +1,5 @@
+parser.c:18:6:check_msg_identifier	16	static
+parser.c:24:6:check_msg_UID	24	static
+parser.c:39:6:check_msg_size	16	static
+parser.c:45:6:build_ack_msg	24	static
+parser.c:57:6:parser	24	static

@@ -1,0 +1,5 @@
+main_msg_gen.c:11:19:send_main_msg_nox	56	static
+main_msg_gen.c:30:19:send_main_msg_voc	56	static
+main_msg_gen.c:49:19:send_main_msg_sgp_initialization	56	static
+main_msg_gen.c:67:19:send_main_msg_humidity	64	static
+main_msg_gen.c:88:19:send_main_msg_temperature	64	static
