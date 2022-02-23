@@ -12205,7 +12205,7 @@ HAL_StatusTypeDef send_sec_msg_air_extraction_tachymeter(uint16_t tachy, UART_Ha
  8004a28:	08004e20 	.word	0x08004e20
 
 08004a2c <build_ack_msg_cmd>:
-	MSG_TYPE_COMMAND, 								// Message type
+	MSG_TYPE_INFORMATION, 								// Message type
 	CMD_ACK, 										// Sub message type
 	MSG_LENGTH_FIRST_BYTE, MSG_LENGTH_1_SECOND_BYTE	// Length
 }; 													// 12 first bytes
