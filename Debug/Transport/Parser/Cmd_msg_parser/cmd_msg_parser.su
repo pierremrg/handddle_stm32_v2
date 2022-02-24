@@ -6,4 +6,5 @@ cmd_msg_parser.c:44:6:parser_cmd_udpate_watchdog	16	static
 cmd_msg_parser.c:48:6:parser_cmd_force_reset	16	static
 cmd_msg_parser.c:52:6:parser_cmd_cooling_fan	24	static
 cmd_msg_parser.c:61:6:parser_cmd_heater_fan	24	static
-cmd_msg_parser.c:77:6:parser_cmd	24	static
+cmd_msg_parser.c:70:6:parser_cmd_light_color	24	static
+cmd_msg_parser.c:87:6:parser_cmd	24	static

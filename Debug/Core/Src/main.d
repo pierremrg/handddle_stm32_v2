@@ -42,8 +42,11 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
  ../Core/Src/../../Transport/Msg_gen/Sec_msg_gen/sec_msg_gen.h \
  ../Core/Src/../../Transport/Msg_gen/Sec_msg_gen/../../Inc/msg_types.h \
  ../Core/Src/../../Transport/Msg_gen/Sec_msg_gen/../../uid.h \
+ ../Core/Src/../../Transport/Msg_gen/Main_msg_gen/main_msg_gen.h \
  ../Core/Src/../../Lib/Inc/cooling_fan.h \
- ../Core/Src/../../Lib/Inc/heater_fan.h
+ ../Core/Src/../../Lib/Inc/heater_fan.h \
+ ../Core/Src/../../Lib/Inc/lights.h \
+ ../Core/Src/../../Lib/Inc/../../Core/Inc/main.h
 
 ../Core/Inc/main.h:
 
@@ -133,6 +136,12 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
 
 ../Core/Src/../../Transport/Msg_gen/Sec_msg_gen/../../uid.h:
 
+../Core/Src/../../Transport/Msg_gen/Main_msg_gen/main_msg_gen.h:
+
 ../Core/Src/../../Lib/Inc/cooling_fan.h:
 
 ../Core/Src/../../Lib/Inc/heater_fan.h:
+
+../Core/Src/../../Lib/Inc/lights.h:
+
+../Core/Src/../../Lib/Inc/../../Core/Inc/main.h:

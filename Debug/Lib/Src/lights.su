@@ -1,0 +1,4 @@
+lights.c:9:5:percentage	24	static
+lights.c:16:6:fade	24	static
+lights.c:87:6:set_lights	16	static
+lights.c:143:6:fadeB	64	static

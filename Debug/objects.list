@@ -23,6 +23,7 @@
 "./Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_uart.o"
 "./Lib/Src/cooling_fan.o"
 "./Lib/Src/heater_fan.o"
+"./Lib/Src/lights.o"
 "./Transport/Msg_gen/Error_msg_gen/error_msg_gen.o"
 "./Transport/Msg_gen/Main_msg_gen/main_msg_gen.o"
 "./Transport/Msg_gen/Sec_msg_gen/sec_msg_gen.o"

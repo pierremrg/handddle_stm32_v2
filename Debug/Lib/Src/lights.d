@@ -1,6 +1,5 @@
-Transport/Msg_gen/Main_msg_gen/main_msg_gen.o: \
- ../Transport/Msg_gen/Main_msg_gen/main_msg_gen.c \
- ../Transport/Msg_gen/Main_msg_gen/main_msg_gen.h ../Core/Inc/main.h \
+Lib/Src/lights.o: ../Lib/Src/lights.c ../Lib/Src/../Inc/lights.h \
+ ../Lib/Src/../Inc/../../Core/Inc/main.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h \
  ../Core/Inc/stm32f4xx_hal_conf.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_rcc.h \
@@ -32,14 +31,11 @@ Transport/Msg_gen/Main_msg_gen/main_msg_gen.o: \
  /home/handddle/Bureau/HANDDDLE_V2/handddle_stm32_v2/Core/Additional_features/defines.h \
  /home/handddle/Bureau/HANDDDLE_V2/handddle_stm32_v2/Core/Additional_features/extern_variables.h \
  /home/handddle/Bureau/HANDDDLE_V2/handddle_stm32_v2/Core/Additional_features/libraries.h \
- /home/handddle/Bureau/HANDDDLE_V2/handddle_stm32_v2/Core/Additional_features/functions.h \
- ../Transport/Msg_gen/Main_msg_gen/../../Inc/msg_types.h \
- ../Transport/Msg_gen/Main_msg_gen/../../uid.h \
- ../Transport/Msg_gen/Main_msg_gen/../../Inc/transport.h
+ /home/handddle/Bureau/HANDDDLE_V2/handddle_stm32_v2/Core/Additional_features/functions.h
 
-../Transport/Msg_gen/Main_msg_gen/main_msg_gen.h:
+../Lib/Src/../Inc/lights.h:
 
-../Core/Inc/main.h:
+../Lib/Src/../Inc/../../Core/Inc/main.h:
 
 ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h:
 
@@ -104,9 +100,3 @@ Transport/Msg_gen/Main_msg_gen/main_msg_gen.o: \
 /home/handddle/Bureau/HANDDDLE_V2/handddle_stm32_v2/Core/Additional_features/libraries.h:
 
 /home/handddle/Bureau/HANDDDLE_V2/handddle_stm32_v2/Core/Additional_features/functions.h:
-
-../Transport/Msg_gen/Main_msg_gen/../../Inc/msg_types.h:
-
-../Transport/Msg_gen/Main_msg_gen/../../uid.h:
-
-../Transport/Msg_gen/Main_msg_gen/../../Inc/transport.h:

@@ -6,15 +6,18 @@
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
 ../Lib/Src/cooling_fan.c \
-../Lib/Src/heater_fan.c 
+../Lib/Src/heater_fan.c \
+../Lib/Src/lights.c 
 
 OBJS += \
 ./Lib/Src/cooling_fan.o \
-./Lib/Src/heater_fan.o 
+./Lib/Src/heater_fan.o \
+./Lib/Src/lights.o 
 
 C_DEPS += \
 ./Lib/Src/cooling_fan.d \
-./Lib/Src/heater_fan.d 
+./Lib/Src/heater_fan.d \
+./Lib/Src/lights.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes

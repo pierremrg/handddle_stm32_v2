@@ -18,6 +18,9 @@ extern bool watchdog_update;
 extern uint8_t pwm_cooling_fan;
 extern uint8_t pwm_heater_fan;
 
+// For light color
+extern uint8_t light_color;
+
 //for UART
 extern UART_HandleTypeDef huart2;
 
@@ -27,6 +30,12 @@ extern int ic_val1_heater, ic_val2_heater, difference_heater, is_first_captured_
 extern int frequency;// for PWM of fans
 extern TIM_HandleTypeDef htim2;
 extern TIM_HandleTypeDef htim3;
+
+//Timer and variable for lights
+//Common variable
+extern int led_color;
+extern TIM_HandleTypeDef htim1;
+extern TIM_HandleTypeDef htim12;
 
 
 #endif /* ADDITIONAL_FEATURES_EXTERN_VARIABLES_H_ */

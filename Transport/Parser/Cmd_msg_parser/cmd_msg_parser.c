@@ -67,6 +67,16 @@ void parser_cmd_heater_fan(uint8_t * rx_buff,UART_HandleTypeDef * uart)
 	}
 }
 
+void parser_cmd_light_color(uint8_t * rx_buff,UART_HandleTypeDef * uart)
+{
+	uint8_t data = rx_buff[DATA];
+
+	if(data >= LIGHT_COLOR_MIN_INDEX && data <= LIGHT_COLOR_MAX_INDEX)
+	{
+		light_color = data;
+	}
+}
+
 
 
 
@@ -93,6 +103,10 @@ void parser_cmd(uint8_t * rx_buff, UART_HandleTypeDef * uart){
 		case CMD_HEATER_FAN:
 			send_cmd_ack(uart);
 			parser_cmd_heater_fan(rx_buff, uart);
+			break;
+		case CMD_LIGHT_COLOR:
+			send_cmd_ack(uart);
+			parser_cmd_light_color(rx_buff, uart);
 			break;
 		default:
 			send_cmd_nok(uart);

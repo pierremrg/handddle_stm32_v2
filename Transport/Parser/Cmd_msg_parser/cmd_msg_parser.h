@@ -19,6 +19,8 @@ bool watchdog_update;
 uint8_t pwm_cooling_fan;
 uint8_t pwm_heater_fan;
 
+uint8_t light_color;
+
 
 
 /** @def CMD_ACK
@@ -45,6 +47,11 @@ uint8_t pwm_heater_fan;
  *  @brief Command ID to run the heater fan at given dutycyle
  */
 #define CMD_HEATER_FAN 0x04
+
+/** @def CMD_LIGHT_COLOR
+ *  @brief Command ID to set a color
+ */
+#define CMD_LIGHT_COLOR 0x05
 
 
 /*	@fn 	void parser_cmd_update_watchdog(uint8_t * rx_buff,UART_HandleTypeDef * uart)
@@ -74,6 +81,13 @@ void parser_cmd_cooling_fan(uint8_t * rx_buff,UART_HandleTypeDef * uart);
  *	@param	uart Uart strcture used to the communication with the Jetson Nano. If the cable used is the ST-Link, huart2
  */
 void parser_cmd_heater_fan(uint8_t * rx_buff,UART_HandleTypeDef * uart);
+
+/*	@fn 	void parser_cmd_light_color(uint8_t * rx_buff,UART_HandleTypeDef * uart)
+ *	@brief 	Function used to parse the command value to send to the register of timer (to set a color)
+ *	@param	rx_buff Pointer to the array tab containing the message received
+ *	@param	uart Uart strcture used to the communication with the Jetson Nano. If the cable used is the ST-Link, huart2
+ */
+void parser_cmd_light_color(uint8_t * rx_buff,UART_HandleTypeDef * uart);
 
 
 
