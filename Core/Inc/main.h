@@ -80,6 +80,10 @@ void Error_Handler(void);
 #define GREEN_LIGHT_GPIO_Port GPIOA
 #define RED_LIGHT_Pin GPIO_PIN_11
 #define RED_LIGHT_GPIO_Port GPIOA
+#define DFPlayer_TX_Pin GPIO_PIN_12
+#define DFPlayer_TX_GPIO_Port GPIOC
+#define DFPlayer_RX_Pin GPIO_PIN_2
+#define DFPlayer_RX_GPIO_Port GPIOD
 #define HEATER_Pin GPIO_PIN_9
 #define HEATER_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */

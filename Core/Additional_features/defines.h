@@ -11,6 +11,7 @@
 
 #define ZERO 								0x00
 #define ONE									0x01
+#define TWO									0x02
 
 #define DEFAULT_ACK_VALUE 					0x01
 #define DEFAULT_TIMEOUT 					200
@@ -32,7 +33,14 @@
 
 // For light color
 #define LIGHT_COLOR_MIN_INDEX				0
-#define LIGHT_COLOR_MAX_INDEX				6
+#define LIGHT_COLOR_MAX_INDEX				7
+
+// For sound module
+#define SOUND_MODULE_MIN_VOLUME 			0
+#define SOUND_MODULE_MAX_VOLUME 			30
+#define SOUND_MODULE_MIN_EQ		 			0
+#define SOUND_MODULE_MAX_EQ		 			5
+
 
 
 #endif /* ADDITIONAL_FEATURES_DEFINES_H_ */

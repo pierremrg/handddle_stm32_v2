@@ -33,6 +33,7 @@
 #include "../../Lib/Inc/cooling_fan.h"
 #include "../../Lib/Inc/heater_fan.h"
 #include "../../Lib/Inc/lights.h"
+#include "../../Lib/Inc/sound_module.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -56,6 +57,7 @@ TIM_HandleTypeDef htim3;
 TIM_HandleTypeDef htim4;
 TIM_HandleTypeDef htim12;
 
+UART_HandleTypeDef huart5;
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
@@ -71,6 +73,7 @@ static void MX_TIM2_Init(void);
 static void MX_TIM3_Init(void);
 static void MX_TIM1_Init(void);
 static void MX_TIM12_Init(void);
+static void MX_UART5_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -81,6 +84,9 @@ static void MX_TIM12_Init(void);
 // Buffer used to store received bytes from the Jetson card
 uint8_t rx_buffer[MSG_SIZE];
 
+// Buffer used with the sound module
+uint8_t rx_buffer2[MSG_SIZE];
+
 uint64_t last_watchdog_time = 0;
 bool watchdog_actived = false; 	//extern
 bool watchdog_update = false;	//extern
@@ -90,7 +96,7 @@ bool var_toggle = false;
 uint64_t var_timer_4_tick = 0;
 
 //send messages
-bool send_sec_messages = false;
+bool send_messages = false;
 
 int PWM, cooling_fan_frequency;// for PWM of fans
 
@@ -102,7 +108,19 @@ uint8_t pwm_heater_fan = 0;
 uint8_t light_color = 0;
 uint8_t previous_light_color = 0;
 
-bool uart_irq_is_captured = false;
+//sound module
+//extern
+bool sm_next = false;
+bool sm_pause = false;
+bool sm_playback = false;
+bool sm_previous = false;
+uint8_t sm_volume = 20; // default volume
+uint8_t sm_eq = 0;
+uint8_t sm_track = 0;
+bool sm_repeat = false;
+
+bool uart2_irq_is_captured = false;
+bool uart5_irq_is_captured = false;
 
 /* USER CODE END 0 */
 
@@ -140,6 +158,7 @@ int main(void)
   MX_TIM3_Init();
   MX_TIM1_Init();
   MX_TIM12_Init();
+  MX_UART5_Init();
   /* USER CODE BEGIN 2 */
 
   /*     SMART LIGHT    */
@@ -162,6 +181,7 @@ int main(void)
 
   // Start UART reception
   HAL_UART_Receive_IT(&huart2, rx_buffer, MSG_SIZE);
+  HAL_UART_Receive_IT(&huart5, rx_buffer2, MSG_SIZE);
   //Ack value send to the Jetson Nano
   send_cmd_ack_with_value(&huart2, DEFAULT_ACK_VALUE);
 
@@ -179,31 +199,90 @@ int main(void)
   previous_light_color = light_color;
   send_main_msg_light_color(light_color, &huart2);
 
+  //sound module
+  //local
+  uint8_t previous_sm_volume = sm_volume;
+  uint8_t previous_sm_eq = sm_eq;
+  uint8_t previous_sm_track = sm_track;
+  sm_init(sm_volume);
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  if(uart_irq_is_captured == true)
+	  if(uart2_irq_is_captured == true)
 	  {
-		  uart_irq_is_captured = false;
+		  uart2_irq_is_captured = false;
 		  parser(rx_buffer,&huart2);
 		  memset(rx_buffer, ZERO, sizeof(rx_buffer));
 		  HAL_UART_Receive_IT(&huart2, rx_buffer, MSG_SIZE);
 	  }
 
+	  if(uart5_irq_is_captured == true)
+	  {
+		  uart5_irq_is_captured = false;
+		  parser(rx_buffer2,&huart2);
+		  memset(rx_buffer2, ZERO, sizeof(rx_buffer2));
+		  HAL_UART_Receive_IT(&huart5, rx_buffer2, MSG_SIZE);
+	  }
+
+	  if(sm_next)
+	  {
+		  sm_next = false;
+		  sm_next_track();
+	  }
+	  if(sm_pause)
+	  {
+		  sm_pause = false;
+		  sm_pause_track();
+	  }
+	  if(sm_previous)
+	  {
+		  sm_previous = false;
+		  sm_previous_track();
+	  }
+
+	  if(sm_repeat)
+	  {
+		  sm_repeat = false;
+		  sm_repeat_track(sm_repeat);
+	  }
+
+	  if(sm_playback)
+	  {
+		  sm_playback = false;
+		  sm_playback_track();
+	  }
+
+	  if(previous_sm_volume != sm_volume)
+	  {
+		  sm_change_volume(sm_volume);
+		  previous_sm_volume = sm_volume;
+	  }
+
+	  if(previous_sm_eq != sm_eq)
+	  {
+		  sm_select_eq(sm_eq);
+		  previous_sm_eq = sm_eq;
+	  }
+
+	  if(previous_sm_track != sm_track)
+	  {
+		  sm_select_track(sm_track);
+		  previous_sm_track = sm_track;
+	  }
+
 	  set_cooling_fan_pwm(pwm_cooling_fan, &htim2);
 	  set_heater_fan_pwm(pwm_heater_fan, &htim2);
-
 	  set_lights(light_color);
 
-	  if(send_sec_messages == true)
+	  if(send_messages == true)
 	  {
-		  send_sec_messages = false;
+		  send_messages = false;
 //		  uint16_t frq = get_cooling_frequency();
-		  uint16_t rpm = get_cooling_rpm();
-		  send_sec_msg_air_extraction_tachymeter(rpm, &huart2);
+//		  uint16_t rpm = get_cooling_rpm();
 
 		  if(previous_light_color != light_color)
 		  {
@@ -211,6 +290,7 @@ int main(void)
 			  previous_light_color = light_color;
 		  }
 
+//		  send_sec_msg_air_extraction_tachymeter(rpm, &huart2);
 	  }
 
 	  if(watchdog_actived == true)
@@ -548,6 +628,39 @@ static void MX_TIM12_Init(void)
 }
 
 /**
+  * @brief UART5 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_UART5_Init(void)
+{
+
+  /* USER CODE BEGIN UART5_Init 0 */
+
+  /* USER CODE END UART5_Init 0 */
+
+  /* USER CODE BEGIN UART5_Init 1 */
+
+  /* USER CODE END UART5_Init 1 */
+  huart5.Instance = UART5;
+  huart5.Init.BaudRate = 9600;
+  huart5.Init.WordLength = UART_WORDLENGTH_8B;
+  huart5.Init.StopBits = UART_STOPBITS_1;
+  huart5.Init.Parity = UART_PARITY_NONE;
+  huart5.Init.Mode = UART_MODE_TX_RX;
+  huart5.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  huart5.Init.OverSampling = UART_OVERSAMPLING_16;
+  if (HAL_UART_Init(&huart5) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN UART5_Init 2 */
+
+  /* USER CODE END UART5_Init 2 */
+
+}
+
+/**
   * @brief USART2 Initialization Function
   * @param None
   * @retval None
@@ -593,6 +706,7 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
   __HAL_RCC_GPIOC_CLK_ENABLE();
+  __HAL_RCC_GPIOD_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(HEATER_GPIO_Port, HEATER_Pin, GPIO_PIN_RESET);
@@ -621,7 +735,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 
 		if(var_timer_4_tick % 2 == 0) // each 2s
 		{
-			send_sec_messages = true;
+			send_messages = true;
 
 			if(last_watchdog_time > var_timer_4_tick)
 			{ // Clock overflow
@@ -647,10 +761,12 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 
 	if(huart->Instance == USART2)
 	{
-		uart_irq_is_captured = true;
-//		parser(rx_buffer,&huart2);
-//		memset(rx_buffer, 0, sizeof(rx_buffer));
-//		HAL_UART_Receive_IT(&huart2, rx_buffer, MSG_SIZE);
+		uart2_irq_is_captured = true;
+	}
+
+	else if(huart->Instance == UART5)
+	{
+		uart5_irq_is_captured = true;
 	}
 }
 

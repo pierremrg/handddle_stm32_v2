@@ -75,6 +75,7 @@ void parser(uint8_t * rx_buff, UART_HandleTypeDef * uart)
 				{
 					case MSG_TYPE_COMMAND:
 						parser_cmd(rx_buff, uart);
+						build_ack_msg(ZERO);
 						break;
 					default:
 						// Unknown message --> Sending ACK NOK

@@ -21,37 +21,70 @@ uint8_t pwm_heater_fan;
 
 uint8_t light_color;
 
+bool sm_next;
+bool sm_pause;
+bool sm_playback;
+bool sm_previous;
+uint8_t sm_volume;
+uint8_t sm_eq;
+uint8_t sm_track;
+bool sm_repeat;
 
 
 /** @def CMD_ACK
  *  @brief Message ID for the ack when it's a command message
  */
-#define CMD_ACK 0x00
+#define CMD_ACK 									0x00
 
 /** @def CMD_UPDATE_WATCHDOG
  *  @brief Command ID for the watchdog
  */
-#define CMD_UPDATE_WATCHDOG 0x01
+#define CMD_UPDATE_WATCHDOG 						0x01
 
 /** @def CMD_FORCE_RESET
  *  @brief Command ID to force reset
  */
-#define CMD_FORCE_RESET 0x02
+#define CMD_FORCE_RESET 							0x02
 
 /** @def CMD_COOLING_FAN
  *  @brief Command ID to run the cooling fan at given dutycyle
  */
-#define CMD_COOLING_FAN 0x03
+#define CMD_COOLING_FAN 							0x03
 
 /** @def CMD_HEATER_FAN
  *  @brief Command ID to run the heater fan at given dutycyle
  */
-#define CMD_HEATER_FAN 0x04
+#define CMD_HEATER_FAN 								0x04
 
 /** @def CMD_LIGHT_COLOR
  *  @brief Command ID to set a color
  */
-#define CMD_LIGHT_COLOR 0x05
+#define CMD_LIGHT_COLOR 							0x05
+
+/** @def CMD_SOUND_MODULE_VOLUME
+ *  @brief Command ID to modify the volume
+ */
+#define CMD_SOUND_MODULE_VOLUME						0x0F
+
+/** @def CMD_SOUND_MODULE_EQ
+ *  @brief Command ID to select an EQ
+ */
+#define CMD_SOUND_MODULE_EQ							0x10
+
+/** @def CMD_SOUND_MODULE_TRACK
+ *  @brief Command ID to select a track
+ */
+#define CMD_SOUND_MODULE_SELECT_TRACK				0x11
+
+/** @def CMD_SOUND_MODULE_REPEAT
+ *  @brief Command ID to repeat or not the track
+ */
+#define CMD_SOUND_MODULE_REPEAT						0x12
+
+/** @def CMD_SOUND_MODULE_SIMPLE_CMD
+ *  @brief Command ID to select a function
+ */
+#define CMD_SOUND_MODULE_SIMPLE_CMD 				0x13
 
 
 /*	@fn 	void parser_cmd_update_watchdog(uint8_t * rx_buff,UART_HandleTypeDef * uart)
@@ -89,7 +122,40 @@ void parser_cmd_heater_fan(uint8_t * rx_buff,UART_HandleTypeDef * uart);
  */
 void parser_cmd_light_color(uint8_t * rx_buff,UART_HandleTypeDef * uart);
 
+/*	@fn 	void parser_cmd_sound_module_simple_command(uint8_t * rx_buff, UART_HandleTypeDef * uart)
+ * 	@brief 	Function used to parse the command value to select the right sound module function
+ * 	@param 	rx_buff Pointer to the array tab containing the message received
+ * 	@param 	uart Uart strcture used to the communication with the Jetson Nano. If the cable used is the ST-Link, huart2
+ */
+void parser_cmd_sound_module_simple_command(uint8_t * rx_buff,UART_HandleTypeDef * uart);
 
+/*	@fn 	void parser_cmd_sound_module_volume(uint8_t * rx_buff, UART_HandleTypeDef * uart)
+ * 	@brief 	Function used to parse the command value to select the volume
+ * 	@param 	rx_buff Pointer to the array tab containing the message received
+ * 	@param 	uart Uart strcture used to the communication with the Jetson Nano. If the cable used is the ST-Link, huart2
+ */
+void parser_cmd_sound_module_volume(uint8_t * rx_buff,UART_HandleTypeDef * uart);
+
+/*	@fn 	void parser_cmd_sound_module_eq(uint8_t * rx_buff, UART_HandleTypeDef * uart)
+ * 	@brief 	Function used to parse the command value to select the eq
+ * 	@param 	rx_buff Pointer to the array tab containing the message received
+ * 	@param 	uart Uart strcture used to the communication with the Jetson Nano. If the cable used is the ST-Link, huart2
+ */
+void parser_cmd_sound_module_eq(uint8_t * rx_buff,UART_HandleTypeDef * uart);
+
+/*	@fn 	void parser_cmd_sound_module_select_track(uint8_t * rx_buff, UART_HandleTypeDef * uart)
+ * 	@brief 	Function used to parse the command value to select the track
+ * 	@param 	rx_buff Pointer to the array tab containing the message received
+ * 	@param 	uart Uart strcture used to the communication with the Jetson Nano. If the cable used is the ST-Link, huart2
+ */
+void parser_cmd_sound_module_select_track(uint8_t * rx_buff,UART_HandleTypeDef * uart);
+
+/*	@fn 	void parser_cmd_sound_module_repeat(uint8_t * rx_buff, UART_HandleTypeDef * uart)
+ * 	@brief 	Function used to parse the command value to loop or not the current track
+ * 	@param 	rx_buff Pointer to the array tab containing the message received
+ * 	@param 	uart Uart strcture used to the communication with the Jetson Nano. If the cable used is the ST-Link, huart2
+ */
+void parser_cmd_sound_module_repeat(uint8_t * rx_buff,UART_HandleTypeDef * uart);
 
 
 

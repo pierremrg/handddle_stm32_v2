@@ -20,7 +20,7 @@ void fade(int color)
 
 	if(color == BLUE_HANDDDLE && pwm<=100)
 	{
-		if(tokenB == 0)
+		if(tokenB == ZERO)
 		{
 			htim1.Instance -> CCR4 = percentage(14, pwm);
 			htim1.Instance -> CCR3 = percentage(90, pwm);
@@ -114,6 +114,13 @@ void set_lights(int color)
 	    	htim1.Instance->CCR4 = 0; //Modulation
 	    	htim1.Instance->CCR3 = 100; //Modulation
 	    	htim1.Instance->CCR2 = 0; //Modulation
+	    	htim12.Instance->CCR1 = 0; //Modulation
+	    	break;
+
+	    case BLUE:
+	    	htim1.Instance->CCR4 = 0; //Modulation
+	    	htim1.Instance->CCR3 = 0; //Modulation
+	    	htim1.Instance->CCR2 = 100; //Modulation
 	    	htim12.Instance->CCR1 = 0; //Modulation
 	    	break;
 

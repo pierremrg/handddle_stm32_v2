@@ -23,6 +23,7 @@ extern uint8_t light_color;
 
 //for UART
 extern UART_HandleTypeDef huart2;
+extern UART_HandleTypeDef huart5;
 
 //Variables used to get frequency
 extern int ic_val1_cooling, ic_val2_cooling, difference_cooling, is_first_captured_cooling;
@@ -37,5 +38,14 @@ extern int led_color;
 extern TIM_HandleTypeDef htim1;
 extern TIM_HandleTypeDef htim12;
 
+//For sound module
+extern bool sm_next;
+extern bool sm_pause;
+extern bool sm_playback;
+extern bool sm_previous;
+extern uint8_t sm_volume;
+extern uint8_t sm_eq;
+extern uint8_t sm_track;
+extern bool sm_repeat;
 
 #endif /* ADDITIONAL_FEATURES_EXTERN_VARIABLES_H_ */

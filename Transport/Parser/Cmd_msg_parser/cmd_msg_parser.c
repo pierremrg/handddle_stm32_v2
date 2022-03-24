@@ -77,7 +77,61 @@ void parser_cmd_light_color(uint8_t * rx_buff,UART_HandleTypeDef * uart)
 	}
 }
 
+void parser_cmd_sound_module_simple_command(uint8_t * rx_buff,UART_HandleTypeDef * uart)
+{
+	uint8_t data = rx_buff[DATA];
 
+	switch (data) {
+		case 1:
+			sm_previous = true;
+			break;
+		case 2:
+			sm_next = true;
+			break;
+		case 3:
+			sm_pause = true;
+			break;
+		case 4:
+			sm_playback = true;
+			break;
+	}
+}
+
+void parser_cmd_sound_module_volume(uint8_t * rx_buff,UART_HandleTypeDef * uart)
+{
+	uint8_t data = rx_buff[DATA];
+	if(data >= SOUND_MODULE_MIN_VOLUME && data <= SOUND_MODULE_MAX_VOLUME)
+	{
+		sm_volume = data;
+	}
+}
+
+void parser_cmd_sound_module_eq(uint8_t * rx_buff,UART_HandleTypeDef * uart)
+{
+	uint8_t data = rx_buff[DATA];
+	if(data >= SOUND_MODULE_MIN_EQ && data <= SOUND_MODULE_MAX_EQ)
+	{
+		sm_eq = data;
+	}
+}
+
+void parser_cmd_sound_module_select_track(uint8_t * rx_buff,UART_HandleTypeDef * uart)
+{
+	uint8_t data = rx_buff[DATA];
+	if(data >= SOUND_MODULE_MIN_EQ && data <= SOUND_MODULE_MAX_EQ)
+	{
+		sm_track = data;
+	}
+}
+
+void parser_cmd_sound_module_repeat(uint8_t * rx_buff,UART_HandleTypeDef * uart)
+{
+	uint8_t data = rx_buff[DATA];
+	if(data == ONE || data == TWO)
+	{
+		sm_repeat = data;
+	}
+}
 
 
 
@@ -107,6 +161,26 @@ void parser_cmd(uint8_t * rx_buff, UART_HandleTypeDef * uart){
 		case CMD_LIGHT_COLOR:
 			send_cmd_ack(uart);
 			parser_cmd_light_color(rx_buff, uart);
+			break;
+		case CMD_SOUND_MODULE_VOLUME:
+			send_cmd_ack(uart);
+			parser_cmd_sound_module_volume(rx_buff, uart);
+			break;
+		case CMD_SOUND_MODULE_EQ:
+			send_cmd_ack(uart);
+			parser_cmd_sound_module_eq(rx_buff, uart);
+			break;
+		case CMD_SOUND_MODULE_SELECT_TRACK:
+			send_cmd_ack(uart);
+			parser_cmd_sound_module_select_track(rx_buff, uart);
+			break;
+		case CMD_SOUND_MODULE_REPEAT:
+			send_cmd_ack(uart);
+			parser_cmd_sound_module_repeat(rx_buff, uart);
+			break;
+		case CMD_SOUND_MODULE_SIMPLE_CMD:
+			send_cmd_ack(uart);
+			parser_cmd_sound_module_simple_command(rx_buff, uart);
 			break;
 		default:
 			send_cmd_nok(uart);
