@@ -35,6 +35,8 @@
  */
 #define MAIN_MSG_TEMPERATURE 0x05
 
+#define MAIN_MSG_PRESSURE	0x0F
+
 /* @fn 		HAL_StatusTypeDef send_main_msg_led_color(uint8_t light_color,UART_HandleTypeDef * uart )
  * @brief 	Function used to send the light color value message
  * @param 	light_color is the value to be sent
@@ -84,3 +86,11 @@ HAL_StatusTypeDef send_main_msg_temperature(double temperature, UART_HandleTypeD
  * @return 	HAL_ERROR if something went wrong; HAL_OK if every went well
  */
 HAL_StatusTypeDef send_main_msg_humidity(double humidity, UART_HandleTypeDef * uart );
+
+/* @fn 		HAL_StatusTypeDef send_main_msg_pressure(uint16_t pressure, UART_HandleTypeDef * uart );
+ * @brief 	Function used to send the pressure value message
+ * @param 	pressure is the value to be sent
+ * @param 	uart Uart structure used to the communication with the Jetson Nano
+ * @return 	HAL_ERROR if something went wrong; HAL_OK if every went well
+ */
+HAL_StatusTypeDef send_main_msg_pressure(uint16_t pressure, UART_HandleTypeDef * uart );

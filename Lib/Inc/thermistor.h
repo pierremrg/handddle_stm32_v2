@@ -11,13 +11,16 @@
 
 ADC_HandleTypeDef hadc1;
 
+/*
+ * @note 	structure used to store all ntc thermistor values
+ */
 typedef struct ntc_thermistor_values{
 	uint16_t div_coefficient, offset, adc_value;
 	float temperatureC;
 	uint8_t positive_temperature;
 } ntc_thermistor_values;
 
-
+// from ntc google sheets
 #define THRESHOLD_10_DEGREES			1782
 #define THRESHOLD_15_DEGREES			1862
 #define THRESHOLD_20_DEGREES			1951
@@ -72,9 +75,24 @@ typedef struct ntc_thermistor_values{
 #define OFFSET_80_DEGREES				1144
 #define OFFSET_85_DEGREES				1322
 
-
+/*	@fn 	uint16_t reading_adc_channel_0(void);
+ * 	@brief 	Function used to read the adc value on channel 0
+ * 	@retval	return the read value
+ */
 uint16_t reading_adc_channel_0(void);
+
+/*	@fn 	ntc_thermistor_values applying_coefficients(uint16_t adc_raw_value);
+ * 	@brief 	Function used to get the coefficients used to calculate the temperature
+ * 	@param	adc_raw_value is the adc value read in previous function
+ * 	@retval return a struct with the differents coefficients calculated
+ */
 ntc_thermistor_values applying_coefficients(uint16_t adc_raw_value);
+
+/*	@fn 	float temperature_calculation(ntc_thermistor_values ntc_values);
+ * 	@brief 	Function used to calculate the temperature of embedded electronics
+ * 	@param	ntc values is the struct read in the previous function
+ * 	@retval	return the themperature in a floatting value
+ */
 float temperature_calculation(ntc_thermistor_values ntc_values);
 
 

@@ -62,10 +62,14 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define THERMISTOR_Pin GPIO_PIN_0
+#define THERMISTOR_GPIO_Port GPIOA
 #define USART_TX_Pin GPIO_PIN_2
 #define USART_TX_GPIO_Port GPIOA
 #define USART_RX_Pin GPIO_PIN_3
 #define USART_RX_GPIO_Port GPIOA
+#define PRESSURE_Pin GPIO_PIN_4
+#define PRESSURE_GPIO_Port GPIOA
 #define COOLING_FAN_PWM_Pin GPIO_PIN_5
 #define COOLING_FAN_PWM_GPIO_Port GPIOA
 #define DOOR_LATCH_1_Pin GPIO_PIN_6

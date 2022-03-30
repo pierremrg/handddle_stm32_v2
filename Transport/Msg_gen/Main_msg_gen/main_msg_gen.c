@@ -124,3 +124,23 @@ HAL_StatusTypeDef send_main_msg_temperature(double temperature, UART_HandleTypeD
 
 	return HAL_UART_Transmit(uart,Tx_msg_temperature,MSG_SIZE+OFFSET_OF_1,DEFAULT_TIMEOUT);
 }
+
+HAL_StatusTypeDef send_main_msg_pressure(uint16_t pressure, UART_HandleTypeDef * uart ){
+	uint8_t Tx_msg_pressure[MSG_SIZE + OFFSET_OF_1] = {
+		MSG_HEADER_IDENTIFIER_FIRST_BYTE, MSG_HEADER_IDENTIFIER_SECOND_BYTE, MSG_HEADER_SIZE_FIRST_BYTE, MSG_HEADER_SIZE_SECOND_BYTE, // Global information
+		MSG_HEADER_UID_1_TYPOLOGY, MSG_HEADER_UID_2_MONTH, MSG_HEADER_UID_3_YEAR, MSG_HEADER_UID_4_ID,  // UID of the STM32
+		MSG_TYPE_MAIN, // Message type
+		MAIN_MSG_PRESSURE, // Sub message type
+		MSG_LENGTH_FIRST_BYTE, MSG_LENGTH_2_SECOND_BYTE // Length
+	}; // 12 first bytes
+
+	Tx_msg_pressure[DATA] = pressure >> BYTE_OFFSET;
+	Tx_msg_pressure[DATA+OFFSET_OF_1] = pressure >> ZERO;
+
+	for(int i = DATA + OFFSET_OF_2; i< MSG_SIZE; i++)
+		Tx_msg_pressure[i] = ZERO;
+
+	Tx_msg_pressure[MSG_SIZE] = '\n';
+	return HAL_UART_Transmit(uart,Tx_msg_pressure,MSG_SIZE+OFFSET_OF_1,DEFAULT_TIMEOUT);
+}
+

@@ -36,6 +36,7 @@
 #include "../../Lib/Inc/sound_module.h"
 #include "../../Lib/Inc/door.h"
 #include "../../Lib/Inc/thermistor.h"
+#include "../../Lib/Inc/pressure.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -142,8 +143,10 @@ bool door_opening = false;
 
 //thermistor
 ntc_thermistor_values ntc_values;
-uint16_t adc_raw_value;
-float ee_temperature = 0;
+uint16_t adc_temperature_raw_value;
+
+//pressure
+uint16_t pressure = 0;
 
 /* USER CODE END 0 */
 
@@ -335,9 +338,10 @@ int main(void)
 	  set_lights(led_color);
 	  set_door_lock(door_command);
 
-	  adc_raw_value = reading_adc_channel_0();
-	  ntc_values = applying_coefficients(adc_raw_value);
-	  ee_temperature = temperature_calculation(ntc_values);
+	  adc_temperature_raw_value = reading_adc_channel_0();
+	  ntc_values = applying_coefficients(adc_temperature_raw_value);
+	  ntc_values.temperatureC = temperature_calculation(ntc_values);
+	  pressure = get_pressure();
 
 	  if(previous_door_state != door_state)
 	  {
@@ -365,7 +369,8 @@ int main(void)
 		  }
 
 		  send_sec_msg_air_extraction_tachymeter(rpm, &huart2);
-		  send_sec_msg_ee_temperature(ee_temperature, &huart2);
+		  send_sec_msg_ee_temperature(ntc_values.temperatureC, &huart2);
+		  send_main_msg_pressure(pressure, &huart2);
 	  }
 
 	  if(watchdog_actived == true)

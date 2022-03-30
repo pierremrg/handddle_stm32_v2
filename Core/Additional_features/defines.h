@@ -54,6 +54,11 @@
 #define LATCH_ERROR							2
 #define EXTRACTION_TIME_AFTER_DOOR_OPENED	180
 
+// For pressure
+#define ADC_12_BIT 							4096.0 // 2^12
+#define VOLTAGE_SUPPLY 						3.3 // Volt
+#define FIRST_CONST_750						750
+#define SECOND_CONST_150					150
 
 
 #endif /* ADDITIONAL_FEATURES_DEFINES_H_ */
