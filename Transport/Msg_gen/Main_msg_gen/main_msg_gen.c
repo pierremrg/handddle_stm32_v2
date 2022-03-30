@@ -9,7 +9,7 @@
 #include "../../Inc/transport.h"
 
 
-HAL_StatusTypeDef send_main_msg_light_color(uint8_t light_color,UART_HandleTypeDef * uart ){
+HAL_StatusTypeDef send_main_msg_led_color(uint8_t light_color,UART_HandleTypeDef * uart ){
 	uint8_t Tx_msg_light_color[MSG_SIZE + OFFSET_OF_1] = {
 		MSG_HEADER_IDENTIFIER_FIRST_BYTE, MSG_HEADER_IDENTIFIER_SECOND_BYTE, MSG_HEADER_SIZE_FIRST_BYTE, MSG_HEADER_SIZE_SECOND_BYTE, // Global information
 		MSG_HEADER_UID_1_TYPOLOGY, MSG_HEADER_UID_2_MONTH, MSG_HEADER_UID_3_YEAR, MSG_HEADER_UID_4_ID,  // UID of the STM32

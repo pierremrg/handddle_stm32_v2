@@ -68,6 +68,10 @@ void Error_Handler(void);
 #define USART_RX_GPIO_Port GPIOA
 #define COOLING_FAN_PWM_Pin GPIO_PIN_5
 #define COOLING_FAN_PWM_GPIO_Port GPIOA
+#define DOOR_LATCH_1_Pin GPIO_PIN_6
+#define DOOR_LATCH_1_GPIO_Port GPIOA
+#define DOOR_LATCH_2_Pin GPIO_PIN_5
+#define DOOR_LATCH_2_GPIO_Port GPIOC
 #define HEATER_FAN_PWM_Pin GPIO_PIN_2
 #define HEATER_FAN_PWM_GPIO_Port GPIOB
 #define WHITE_LIGHT_Pin GPIO_PIN_14
@@ -80,6 +84,8 @@ void Error_Handler(void);
 #define GREEN_LIGHT_GPIO_Port GPIOA
 #define RED_LIGHT_Pin GPIO_PIN_11
 #define RED_LIGHT_GPIO_Port GPIOA
+#define DOOR_CMD_Pin GPIO_PIN_11
+#define DOOR_CMD_GPIO_Port GPIOC
 #define DFPlayer_TX_Pin GPIO_PIN_12
 #define DFPlayer_TX_GPIO_Port GPIOC
 #define DFPlayer_RX_Pin GPIO_PIN_2

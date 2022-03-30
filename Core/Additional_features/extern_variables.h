@@ -15,6 +15,8 @@ extern bool watchdog_actived;
 extern bool watchdog_update;
 
 // For fans
+extern uint8_t previous_pwm_cooling_fan;
+extern uint8_t previous_pwm_heater_fan;
 extern uint8_t pwm_cooling_fan;
 extern uint8_t pwm_heater_fan;
 
@@ -34,18 +36,29 @@ extern TIM_HandleTypeDef htim3;
 
 //Timer and variable for lights
 //Common variable
-extern int led_color;
+extern uint8_t led_color;
 extern TIM_HandleTypeDef htim1;
 extern TIM_HandleTypeDef htim12;
 
 //For sound module
 extern bool sm_next;
 extern bool sm_pause;
+extern bool sm_stop;
 extern bool sm_playback;
 extern bool sm_previous;
 extern uint8_t sm_volume;
 extern uint8_t sm_eq;
 extern uint8_t sm_track;
 extern bool sm_repeat;
+
+//For door
+extern bool door_init;
+extern bool door_command;
+extern bool door_closure;
+extern bool door_opening;
+extern bool door_state;
+extern bool previous_door_state;
+extern TIM_HandleTypeDef htim7;
+extern uint64_t var_timer_7_tick;
 
 #endif /* ADDITIONAL_FEATURES_EXTERN_VARIABLES_H_ */

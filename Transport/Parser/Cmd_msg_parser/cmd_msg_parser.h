@@ -19,16 +19,20 @@ bool watchdog_update;
 uint8_t pwm_cooling_fan;
 uint8_t pwm_heater_fan;
 
-uint8_t light_color;
+uint8_t led_color;
 
 bool sm_next;
 bool sm_pause;
+bool sm_stop;
 bool sm_playback;
 bool sm_previous;
 uint8_t sm_volume;
 uint8_t sm_eq;
 uint8_t sm_track;
 bool sm_repeat;
+
+bool door_command;
+bool door_state;
 
 
 /** @def CMD_ACK
@@ -60,6 +64,11 @@ bool sm_repeat;
  *  @brief Command ID to set a color
  */
 #define CMD_LIGHT_COLOR 							0x05
+
+/** @def CMD_DOOR
+ *  @brief Command ID to lock or unlock the door
+ */
+#define CMD_DOOR									0x07
 
 /** @def CMD_SOUND_MODULE_VOLUME
  *  @brief Command ID to modify the volume
@@ -115,12 +124,19 @@ void parser_cmd_cooling_fan(uint8_t * rx_buff,UART_HandleTypeDef * uart);
  */
 void parser_cmd_heater_fan(uint8_t * rx_buff,UART_HandleTypeDef * uart);
 
-/*	@fn 	void parser_cmd_light_color(uint8_t * rx_buff,UART_HandleTypeDef * uart)
+/*	@fn 	void parser_cmd_led_color(uint8_t * rx_buff,UART_HandleTypeDef * uart)
  *	@brief 	Function used to parse the command value to send to the register of timer (to set a color)
  *	@param	rx_buff Pointer to the array tab containing the message received
  *	@param	uart Uart strcture used to the communication with the Jetson Nano. If the cable used is the ST-Link, huart2
  */
-void parser_cmd_light_color(uint8_t * rx_buff,UART_HandleTypeDef * uart);
+void parser_cmd_led_color(uint8_t * rx_buff,UART_HandleTypeDef * uart);
+
+/*	@fn 	void parser_cmd_door(uint8_t * rx_buff,UART_HandleTypeDef * uart)
+ *	@brief 	Function used to parse the command value to lock or unlock the door
+ *	@param	rx_buff Pointer to the array tab containing the message received
+ *	@param	uart Uart strcture used to the communication with the Jetson Nano. If the cable used is the ST-Link, huart2
+ */
+void parser_cmd_door(uint8_t * rx_buff, UART_HandleTypeDef * uart);
 
 /*	@fn 	void parser_cmd_sound_module_simple_command(uint8_t * rx_buff, UART_HandleTypeDef * uart)
  * 	@brief 	Function used to parse the command value to select the right sound module function

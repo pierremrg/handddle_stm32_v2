@@ -34,6 +34,7 @@
 #include "../../Lib/Inc/heater_fan.h"
 #include "../../Lib/Inc/lights.h"
 #include "../../Lib/Inc/sound_module.h"
+#include "../../Lib/Inc/door.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -55,6 +56,7 @@ TIM_HandleTypeDef htim1;
 TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim3;
 TIM_HandleTypeDef htim4;
+TIM_HandleTypeDef htim7;
 TIM_HandleTypeDef htim12;
 
 UART_HandleTypeDef huart5;
@@ -74,6 +76,7 @@ static void MX_TIM3_Init(void);
 static void MX_TIM1_Init(void);
 static void MX_TIM12_Init(void);
 static void MX_UART5_Init(void);
+static void MX_TIM7_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -94,6 +97,8 @@ bool var_toggle = false;
 
 // Variable used to be increment at each tick of timer 4
 uint64_t var_timer_4_tick = 0;
+// Variable used to be increment at each tick of timer 7
+uint64_t var_timer_7_tick = 0;
 
 //send messages
 bool send_messages = false;
@@ -105,13 +110,15 @@ uint8_t pwm_cooling_fan = 0;
 uint8_t pwm_heater_fan = 0;
 
 //light color
-uint8_t light_color = 0;
-uint8_t previous_light_color = 0;
+uint8_t led_color = 0;
+uint8_t previous_led_color = 0;
+uint8_t led_color_buffer = 0;
 
 //sound module
 //extern
 bool sm_next = false;
 bool sm_pause = false;
+bool sm_stop = false;
 bool sm_playback = false;
 bool sm_previous = false;
 uint8_t sm_volume = 20; // default volume
@@ -121,6 +128,13 @@ bool sm_repeat = false;
 
 bool uart2_irq_is_captured = false;
 bool uart5_irq_is_captured = false;
+
+// door
+bool door_init;
+bool door_state;
+bool previous_door_state;
+bool door_closure = false;
+bool door_opening = false;
 
 /* USER CODE END 0 */
 
@@ -159,6 +173,7 @@ int main(void)
   MX_TIM1_Init();
   MX_TIM12_Init();
   MX_UART5_Init();
+  MX_TIM7_Init();
   /* USER CODE BEGIN 2 */
 
   /*     SMART LIGHT    */
@@ -188,16 +203,19 @@ int main(void)
   set_cooling_fan_pwm(PWM_STOP, &htim2);
   set_heater_fan_pwm(PWM_STOP, &htim2);
 
-  if((MSG_HEADER_UID_1_TYPOLOGY == TYPE_MACHINE_RACK) || (MSG_HEADER_UID_1_TYPOLOGY == TYPE_MACHINE_TOIT))
+  if((MSG_HEADER_UID_1_TYPOLOGY == TYPE_MACHINE_RACK) || (MSG_HEADER_UID_1_TYPOLOGY == TYPE_MACHINE_ROOF))
   {
-	  light_color = WHITE;
+	  led_color = WHITE;
+	  previous_led_color = WHITE;
+	  led_color_buffer = WHITE;
   } else if(MSG_HEADER_UID_1_TYPOLOGY == TYPE_POST_TREATMENT)
   {
-	  light_color =  WHITE_PT;
+	  led_color =  WHITE_PT;
+	  previous_led_color = led_color;
+	  led_color_buffer = led_color;
   }
 
-  previous_light_color = light_color;
-  send_main_msg_light_color(light_color, &huart2);
+  send_main_msg_led_color(led_color, &huart2);
 
   //sound module
   //local
@@ -205,6 +223,22 @@ int main(void)
   uint8_t previous_sm_eq = sm_eq;
   uint8_t previous_sm_track = sm_track;
   sm_init(sm_volume);
+
+  //door
+  door_command = LOCKED;
+  set_door_lock(door_command); //default: door opened
+
+  if(get_latches_state() == PRESENT)
+  {
+	  door_state = CLOSED;
+	  previous_door_state = CLOSED;
+	  door_init = false;
+  } else
+  {
+	  door_state = OPENED;
+	  previous_door_state = OPENED;
+	  door_init = true;
+  }
 
   /* USER CODE END 2 */
 
@@ -238,6 +272,11 @@ int main(void)
 		  sm_pause = false;
 		  sm_pause_track();
 	  }
+	  if(sm_stop)
+	  {
+		  sm_stop = false;
+		  sm_stop_track();
+	  }
 	  if(sm_previous)
 	  {
 		  sm_previous = false;
@@ -246,8 +285,8 @@ int main(void)
 
 	  if(sm_repeat)
 	  {
-		  sm_repeat = false;
 		  sm_repeat_track(sm_repeat);
+		  sm_repeat = false;
 	  }
 
 	  if(sm_playback)
@@ -276,21 +315,42 @@ int main(void)
 
 	  set_cooling_fan_pwm(pwm_cooling_fan, &htim2);
 	  set_heater_fan_pwm(pwm_heater_fan, &htim2);
-	  set_lights(light_color);
+	  // Store previous led color
+	  if(led_color_buffer != led_color)
+	  {
+		  previous_led_color = led_color_buffer;
+		  led_color_buffer = led_color;
+	  }
+
+	  set_lights(led_color);
+	  set_door_lock(door_command);
+
+	  if(previous_door_state != door_state)
+	  {
+		  previous_door_state = door_state;
+		  if(door_state == OPENED)
+		  {
+			  door_opening = true;
+		  } else if(door_state == CLOSED)
+		  {
+			  door_closure = true;
+		  }
+	  }
+
+	  door_cycle(true);
 
 	  if(send_messages == true)
 	  {
 		  send_messages = false;
 //		  uint16_t frq = get_cooling_frequency();
-//		  uint16_t rpm = get_cooling_rpm();
+		  uint16_t rpm = get_cooling_rpm();
 
-		  if(previous_light_color != light_color)
+		  if(previous_led_color != led_color)
 		  {
-			  send_main_msg_light_color(light_color, &huart2);
-			  previous_light_color = light_color;
+			  send_main_msg_led_color(led_color, &huart2);
 		  }
 
-//		  send_sec_msg_air_extraction_tachymeter(rpm, &huart2);
+		  send_sec_msg_air_extraction_tachymeter(rpm, &huart2);
 	  }
 
 	  if(watchdog_actived == true)
@@ -586,6 +646,44 @@ static void MX_TIM4_Init(void)
 }
 
 /**
+  * @brief TIM7 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM7_Init(void)
+{
+
+  /* USER CODE BEGIN TIM7_Init 0 */
+
+  /* USER CODE END TIM7_Init 0 */
+
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+
+  /* USER CODE BEGIN TIM7_Init 1 */
+
+  /* USER CODE END TIM7_Init 1 */
+  htim7.Instance = TIM7;
+  htim7.Init.Prescaler = 2000-1;
+  htim7.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim7.Init.Period = 10000-1;
+  htim7.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim7) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim7, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM7_Init 2 */
+
+  /* USER CODE END TIM7_Init 2 */
+
+}
+
+/**
   * @brief TIM12 Initialization Function
   * @param None
   * @retval None
@@ -704,12 +802,34 @@ static void MX_GPIO_Init(void)
 
   /* GPIO Ports Clock Enable */
   __HAL_RCC_GPIOA_CLK_ENABLE();
-  __HAL_RCC_GPIOB_CLK_ENABLE();
   __HAL_RCC_GPIOC_CLK_ENABLE();
+  __HAL_RCC_GPIOB_CLK_ENABLE();
   __HAL_RCC_GPIOD_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(DOOR_CMD_GPIO_Port, DOOR_CMD_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(HEATER_GPIO_Port, HEATER_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin : DOOR_LATCH_1_Pin */
+  GPIO_InitStruct.Pin = DOOR_LATCH_1_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(DOOR_LATCH_1_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : DOOR_LATCH_2_Pin */
+  GPIO_InitStruct.Pin = DOOR_LATCH_2_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(DOOR_LATCH_2_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : DOOR_CMD_Pin */
+  GPIO_InitStruct.Pin = DOOR_CMD_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(DOOR_CMD_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : HEATER_Pin */
   GPIO_InitStruct.Pin = HEATER_Pin;
@@ -733,7 +853,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	if(htim->Instance == TIM4)
 	{
 
-		if(var_timer_4_tick % 2 == 0) // each 2s
+		if(var_timer_4_tick % TWO == 0) // each 2s
 		{
 			send_messages = true;
 
@@ -750,6 +870,11 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		}
 
 		var_timer_4_tick += 1;
+	}
+
+	if(htim->Instance == TIM7)
+	{
+		var_timer_7_tick += 1;
 	}
 }
 

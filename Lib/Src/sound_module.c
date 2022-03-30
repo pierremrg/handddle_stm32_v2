@@ -56,6 +56,11 @@ void sm_pause_track (void)
 	send_cmd(sound_module_pause, sound_module_no_parameter, sound_module_no_parameter);
 }
 
+void sm_stop_track (void)
+{
+	send_cmd(sound_module_stop, sound_module_no_parameter, sound_module_no_parameter);
+}
+
 void sm_previous_track (void)
 {
 	send_cmd(sound_module_previous, sound_module_no_parameter, sound_module_no_parameter);

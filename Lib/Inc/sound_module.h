@@ -26,6 +26,7 @@ typedef enum {
 	sound_module_next 			= 0x01,
 	sound_module_previous		= 0x02,
 	sound_module_pause 			= 0x0E,
+	sound_module_stop 			= 0x16,
 	sound_module_playback		= 0x0D,
 	sound_module_repeat			= 0x11,
 	sound_module_no_parameter	= 0x00
@@ -69,6 +70,11 @@ void sm_next_track (void);
  * 	@brief 	Function used to pause the playback of the track
  */
 void sm_pause_track (void);
+
+/*	@fn 	void sm_stop_track (void);
+ * 	@brief 	Function used to stop the playback of the track
+ */
+void sm_stop_track (void);
 
 /*	@fn 	void sm_playback_track (void);
  * 	@brief 	Function used to playback the track

@@ -52,7 +52,7 @@ void parser_cmd_force_reset(uint8_t * rx_buff, UART_HandleTypeDef * uart){
 void parser_cmd_cooling_fan(uint8_t * rx_buff,UART_HandleTypeDef * uart)
 {
 	uint8_t data = rx_buff[DATA];
-	if(data >= MIN_PWM_FAN && data <= MAX_PWM_FAN)
+	if(data >= MIN_PWM_FAN && data <= MAX_PWM_FAN && door_state == CLOSED)
 	{
 		pwm_cooling_fan = data;
 	}
@@ -67,13 +67,23 @@ void parser_cmd_heater_fan(uint8_t * rx_buff,UART_HandleTypeDef * uart)
 	}
 }
 
-void parser_cmd_light_color(uint8_t * rx_buff,UART_HandleTypeDef * uart)
+void parser_cmd_led_color(uint8_t * rx_buff,UART_HandleTypeDef * uart)
 {
 	uint8_t data = rx_buff[DATA];
 
 	if(data >= LIGHT_COLOR_MIN_INDEX && data <= LIGHT_COLOR_MAX_INDEX)
 	{
-		light_color = data;
+		led_color = data;
+	}
+}
+
+void parser_cmd_door(uint8_t * rx_buff,UART_HandleTypeDef * uart)
+{
+	uint8_t data = rx_buff[DATA];
+
+	if(data == CLOSED || data == OPENED)
+	{
+		door_command = data;
 	}
 }
 
@@ -93,6 +103,9 @@ void parser_cmd_sound_module_simple_command(uint8_t * rx_buff,UART_HandleTypeDef
 			break;
 		case 4:
 			sm_playback = true;
+			break;
+		case 5:
+			sm_stop = true;
 			break;
 	}
 }
@@ -160,7 +173,11 @@ void parser_cmd(uint8_t * rx_buff, UART_HandleTypeDef * uart){
 			break;
 		case CMD_LIGHT_COLOR:
 			send_cmd_ack(uart);
-			parser_cmd_light_color(rx_buff, uart);
+			parser_cmd_led_color(rx_buff, uart);
+			break;
+		case CMD_DOOR:
+			send_cmd_ack(uart);
+			parser_cmd_door(rx_buff, uart);
 			break;
 		case CMD_SOUND_MODULE_VOLUME:
 			send_cmd_ack(uart);

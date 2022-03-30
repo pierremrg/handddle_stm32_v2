@@ -5,6 +5,8 @@
  *      Author: handddle
  */
 
+#include "libraries.h"
+
 #ifndef ADDITIONAL_FEATURES_DEFINES_H_
 #define ADDITIONAL_FEATURES_DEFINES_H_
 
@@ -30,6 +32,7 @@
 #define MIN_PWM_FAN							0
 #define MAX_PWM_FAN							100
 #define PWM_STOP							0
+#define PWM_DOOR_CLOSURE_PT					40 // Post Treatment
 
 // For light color
 #define LIGHT_COLOR_MIN_INDEX				0
@@ -40,6 +43,16 @@
 #define SOUND_MODULE_MAX_VOLUME 			30
 #define SOUND_MODULE_MIN_EQ		 			0
 #define SOUND_MODULE_MAX_EQ		 			5
+
+// For door
+#define PRESENT								1
+#define NOT_PRESENT							0
+#define OPENED								true
+#define CLOSED								false
+#define UNLOCKED							false
+#define LOCKED								true
+#define LATCH_ERROR							2
+#define EXTRACTION_TIME_AFTER_DOOR_OPENED	180
 
 
 
