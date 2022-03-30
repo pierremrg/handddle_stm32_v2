@@ -61,4 +61,7 @@ extern bool previous_door_state;
 extern TIM_HandleTypeDef htim7;
 extern uint64_t var_timer_7_tick;
 
+//For thermistor
+extern ADC_HandleTypeDef hadc1;
+
 #endif /* ADDITIONAL_FEATURES_EXTERN_VARIABLES_H_ */
