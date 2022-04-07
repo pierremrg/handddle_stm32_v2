@@ -28,4 +28,11 @@ HAL_StatusTypeDef write_frame_temp_humi_SHT40(I2C_HandleTypeDef *hi2c_x);
  */
 Struct_TH read_temp_humi_SHT40(I2C_HandleTypeDef *hi2c_x);
 
+/*
+ * @brief  	This function is used to calculate the checksum of a data according to sensirion's datasheet
+ * @param	data is the value fot which we'll calculate the checksum
+ * @retval 	return as an integer value the checksum calculated
+ */
+uint8_t calc_crc(uint16_t data);
+
 #endif /* INC_I2C_H_ */

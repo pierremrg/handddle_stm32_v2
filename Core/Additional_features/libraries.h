@@ -11,6 +11,7 @@
 
 #include <string.h>
 #include <stdbool.h>
+#include <math.h>
 
 
 #endif /* ADDITIONAL_FEATURES_LIBRARIES_H_ */
