@@ -35,8 +35,9 @@
 #include "../../Lib/Inc/lights.h"
 #include "../../Lib/Inc/sound_module.h"
 #include "../../Lib/Inc/door.h"
-#include "../../Lib/Inc/thermistor.h"
+#include "../../Lib/Inc/i2c.h"
 #include "../../Lib/Inc/pressure.h"
+#include "../../Lib/Inc/thermistor.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -56,11 +57,16 @@
 /* Private variables ---------------------------------------------------------*/
 ADC_HandleTypeDef hadc1;
 
+I2C_HandleTypeDef hi2c1;
+I2C_HandleTypeDef hi2c2;
+I2C_HandleTypeDef hi2c3;
+
 TIM_HandleTypeDef htim1;
 TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim3;
 TIM_HandleTypeDef htim4;
 TIM_HandleTypeDef htim7;
+TIM_HandleTypeDef htim9;
 TIM_HandleTypeDef htim12;
 
 UART_HandleTypeDef huart5;
@@ -82,6 +88,10 @@ static void MX_TIM12_Init(void);
 static void MX_UART5_Init(void);
 static void MX_TIM7_Init(void);
 static void MX_ADC1_Init(void);
+static void MX_I2C1_Init(void);
+static void MX_TIM9_Init(void);
+static void MX_I2C2_Init(void);
+static void MX_I2C3_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -100,19 +110,22 @@ bool watchdog_actived = false; 	//extern
 bool watchdog_update = false;	//extern
 bool var_toggle = false;
 
-// Variable used to be increment at each tick of timer 4
+// Variable used to be increment at each tick of timer 4 (main)
 uint64_t var_timer_4_tick = 0;
-// Variable used to be increment at each tick of timer 7
+// Variable used to be increment at each tick of timer 7 (door)
 uint64_t var_timer_7_tick = 0;
+// Variable used to be true at each tick of timer 9 (50ms)
+bool var_timer_9_tick = 0;
 
 //send messages
 bool send_messages = false;
-
-int PWM, cooling_fan_frequency;// for PWM of fans
+bool get_i2c_values = false;
 
 //fans
 uint8_t pwm_cooling_fan = 0;
 uint8_t pwm_heater_fan = 0;
+int cooling_frq;// for PWM of fans
+int cooling_rpm;// for PWM of fans
 
 //light color
 uint8_t led_color = 0;
@@ -127,8 +140,11 @@ bool sm_stop = false;
 bool sm_playback = false;
 bool sm_previous = false;
 uint8_t sm_volume = 20; // default volume
+uint8_t previous_sm_volume = 0;
 uint8_t sm_eq = 0;
+uint8_t previous_sm_eq;
 uint8_t sm_track = 0;
+uint8_t previous_sm_track = 0;
 bool sm_repeat = false;
 
 bool uart2_irq_is_captured = false;
@@ -147,6 +163,22 @@ uint16_t adc_temperature_raw_value;
 
 //pressure
 uint16_t pressure = 0;
+
+//temperature, humidity : Smart Power
+Struct_TH temp_humi_SP;
+
+//temperature, humidity : Smart Sensor n°1
+Struct_TH temp_humi_SS_1;
+
+//temperature, humidity : Smart Sensor n°2
+Struct_TH temp_humi_SS_2;
+
+//UART return value
+HAL_StatusTypeDef return_value_SP, return_value_SS_1, return_value_SS_2;
+
+//temperature
+uint8_t desired_temperature = 0;
+bool heater_activated = false;
 
 /* USER CODE END 0 */
 
@@ -187,6 +219,10 @@ int main(void)
   MX_UART5_Init();
   MX_TIM7_Init();
   MX_ADC1_Init();
+  MX_I2C1_Init();
+  MX_TIM9_Init();
+  MX_I2C2_Init();
+  MX_I2C3_Init();
   /* USER CODE BEGIN 2 */
 
   /*     SMART LIGHT    */
@@ -204,8 +240,14 @@ int main(void)
   HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_4); // For PWM heater fan
   HAL_TIM_IC_Start_IT(&htim3, TIM_CHANNEL_1); // To get tachymeter frequency
 
-  // Timer ticks each second
+  set_cooling_fan_pwm(PWM_STOP, &htim2);
+  set_heater_fan_pwm(PWM_STOP, &htim2);
+
+  // Main timer ticks each second
   HAL_TIM_Base_Start_IT(&htim4);
+
+  // Timer ticks each 50ms (i2c)
+//  HAL_TIM_Base_Start_IT(&htim9);
 
   // Start UART reception
   HAL_UART_Receive_IT(&huart2, rx_buffer, MSG_SIZE);
@@ -213,9 +255,7 @@ int main(void)
   //Ack value send to the Jetson Nano
   send_cmd_ack_with_value(&huart2, DEFAULT_ACK_VALUE);
 
-  set_cooling_fan_pwm(PWM_STOP, &htim2);
-  set_heater_fan_pwm(PWM_STOP, &htim2);
-
+  // Led color
   if((MSG_HEADER_UID_1_TYPOLOGY == TYPE_MACHINE_RACK) || (MSG_HEADER_UID_1_TYPOLOGY == TYPE_MACHINE_ROOF))
   {
 	  led_color = WHITE;
@@ -224,33 +264,36 @@ int main(void)
   } else if(MSG_HEADER_UID_1_TYPOLOGY == TYPE_POST_TREATMENT)
   {
 	  led_color =  WHITE_PT;
-	  previous_led_color = led_color;
-	  led_color_buffer = led_color;
+	  previous_led_color = WHITE_PT;
+	  led_color_buffer = WHITE_PT;
   }
 
   send_main_msg_led_color(led_color, &huart2);
 
   //sound module
   //local
-  uint8_t previous_sm_volume = sm_volume;
-  uint8_t previous_sm_eq = sm_eq;
-  uint8_t previous_sm_track = sm_track;
+  previous_sm_volume = sm_volume;
+  previous_sm_eq = sm_eq;
+  previous_sm_track = sm_track;
   sm_init(sm_volume);
 
   //door
-  door_command = LOCKED;
-  set_door_lock(door_command); //default: door opened
+  if(MSG_HEADER_UID_1_TYPOLOGY == TYPE_MACHINE_ROOF || MSG_HEADER_UID_1_TYPOLOGY == TYPE_POST_TREATMENT)
+  {
+	  door_command = LOCKED;
+	  set_door_lock(door_command); //default: door opened
 
-  if(get_latches_state() == PRESENT)
-  {
-	  door_state = CLOSED;
-	  previous_door_state = CLOSED;
-	  door_init = false;
-  } else
-  {
-	  door_state = OPENED;
-	  previous_door_state = OPENED;
-	  door_init = true;
+	  if(get_latches_state() == PRESENT)
+	  {
+		  door_state = CLOSED;
+		  previous_door_state = CLOSED;
+		  door_init = false;
+	  } else
+	  {
+		  door_state = OPENED;
+		  previous_door_state = OPENED;
+		  door_init = true;
+	  }
   }
 
   /* USER CODE END 2 */
@@ -259,6 +302,9 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+	  /*
+	   * 	Reading Datas
+	   */
 	  if(uart2_irq_is_captured == true)
 	  {
 		  uart2_irq_is_captured = false;
@@ -275,6 +321,137 @@ int main(void)
 		  HAL_UART_Receive_IT(&huart5, rx_buffer2, MSG_SIZE);
 	  }
 
+	  if(get_i2c_values)
+	  {
+		  get_i2c_values = false;
+
+		  /* SmartSensor */
+		  return_value_SP = write_frame_temp_humi_SHT40(&hi2c1);
+		  return_value_SS_1 = write_frame_temp_humi_SHT40(&hi2c2);
+		  return_value_SS_2 = write_frame_temp_humi_SHT40(&hi2c3);
+
+		  HAL_TIM_Base_Start_IT(&htim9); // Start this timer to get all temperatures
+	  }
+
+	  if(var_timer_9_tick)	  //the timer 9 start if get_i2c_values = true and tick 50ms after that all frames are sent.
+	  {							//Then the timer is stopped and we get all the temperatures
+		  var_timer_9_tick = false;
+		  HAL_TIM_Base_Stop_IT(&htim9);
+
+		  temp_humi_SP = read_temp_humi_SHT40(&hi2c1);
+		  temp_humi_SS_1 = read_temp_humi_SHT40(&hi2c2);
+		  temp_humi_SS_2 = read_temp_humi_SHT40(&hi2c3);
+	  }
+
+	  cooling_frq = get_cooling_frequency();
+	  cooling_rpm = get_cooling_rpm();
+	  adc_temperature_raw_value = reading_adc_channel_0();
+	  ntc_values = applying_coefficients(adc_temperature_raw_value);
+	  ntc_values.temperatureC = temperature_calculation(ntc_values);
+	  if(MSG_HEADER_UID_1_TYPOLOGY == TYPE_MACHINE_ROOF || MSG_HEADER_UID_1_TYPOLOGY == TYPE_POST_TREATMENT) door_state = get_latches_state();
+
+
+
+	  /*
+	   * 		Apply functions
+	   */
+	  set_cooling_fan_pwm(pwm_cooling_fan, &htim2);
+	  set_heater_fan_pwm(pwm_heater_fan, &htim2);
+	  set_heater(heater_activated);
+	  set_lights(led_color);
+	  set_door_lock(door_command);
+	  if(MSG_HEADER_UID_1_TYPOLOGY == TYPE_MACHINE_ROOF || MSG_HEADER_UID_1_TYPOLOGY == TYPE_POST_TREATMENT) door_cycle(true);
+
+	  if(desired_temperature >= DESIRED_TEMP_MIN && desired_temperature <= DESIRED_TEMP_MAX && door_state == CLOSED)
+	  {
+		  set_temperature(desired_temperature, temp_humi_SP.temperature, temp_humi_SS_1.temperature);
+	  } else
+	  {
+		  heater_activated = false;
+		  pwm_heater_fan = PWM_HEATER_10;
+	  }
+
+
+	  /*
+	   * 		Assign variables
+	   */
+
+	  if(previous_door_state != door_state)
+	  {
+		  previous_door_state = door_state;
+		  if(door_state == OPENED)
+		  {
+			  door_opening = true;
+		  } else if(door_state == CLOSED)
+		  {
+			  door_closure = true;
+		  }
+	  }
+
+	  if(led_color_buffer != led_color) // Store previous led color
+	  {
+		  previous_led_color = led_color_buffer;
+		  led_color_buffer = led_color;
+	  }
+
+	  /*
+	   * 		Sending datas
+	   */
+	  if(send_messages == true)
+	  {
+		  send_messages = false;
+
+		  send_sec_msg_air_extraction_tachymeter(cooling_rpm, &huart2);
+		  send_sec_msg_ee_temperature(ntc_values.temperatureC, &huart2);
+		  send_main_msg_pressure(pressure, &huart2);
+
+		  //Smart Light
+		  if(previous_led_color != led_color)
+		  {
+			  send_main_msg_led_color(led_color, &huart2);
+		  }
+
+		  // Smart Power
+		  if(return_value_SP == HAL_OK && temp_humi_SP.error_status == false)
+		  {
+			  send_main_msg_humidity(temp_humi_SP.humidity, MAIN_MSG_HUMIDITY_SP, &huart2);
+			  send_main_msg_temperature(temp_humi_SP.temperature, MAIN_MSG_TEMPERATURE_SP, &huart2);
+		  }
+
+		  // Smart Sensor 1
+		  if(return_value_SS_1 == HAL_OK && temp_humi_SS_1.error_status == false)
+		  {
+			  send_main_msg_humidity(temp_humi_SS_1.humidity, MAIN_MSG_HUMIDITY_SS_1, &huart2);
+			  send_main_msg_temperature(temp_humi_SS_1.temperature, MAIN_MSG_TEMPERATURE_SS_1, &huart2);
+		  }
+
+		  // Smart Sensor 2
+		  if(MSG_HEADER_UID_1_TYPOLOGY == TYPE_MACHINE_ROOF &&
+				  return_value_SS_2 == HAL_OK && temp_humi_SS_2.error_status == false)
+		  {
+			  send_main_msg_humidity(temp_humi_SS_2.humidity, MAIN_MSG_HUMIDITY_SS_2, &huart2);
+			  send_main_msg_temperature(temp_humi_SS_2.temperature, MAIN_MSG_TEMPERATURE_SS_2, &huart2);
+		  }
+	  }
+
+	  /*
+	   * 		Watchdog
+	   */
+	  if(watchdog_actived == true)
+	  {
+		  watchdog_actived = false;
+		  HAL_NVIC_SystemReset();
+	  }
+
+	  if(watchdog_update == true)
+	  {
+		  watchdog_update = false;
+		  update_last_watchdog_time();
+	  }
+
+	  /*
+	   * 		Sound module
+	   */
 	  if(sm_next)
 	  {
 		  sm_next = false;
@@ -324,65 +501,6 @@ int main(void)
 	  {
 		  sm_select_track(sm_track);
 		  previous_sm_track = sm_track;
-	  }
-
-	  set_cooling_fan_pwm(pwm_cooling_fan, &htim2);
-	  set_heater_fan_pwm(pwm_heater_fan, &htim2);
-	  // Store previous led color
-	  if(led_color_buffer != led_color)
-	  {
-		  previous_led_color = led_color_buffer;
-		  led_color_buffer = led_color;
-	  }
-
-	  set_lights(led_color);
-	  set_door_lock(door_command);
-
-	  adc_temperature_raw_value = reading_adc_channel_0();
-	  ntc_values = applying_coefficients(adc_temperature_raw_value);
-	  ntc_values.temperatureC = temperature_calculation(ntc_values);
-	  pressure = get_pressure();
-
-	  if(previous_door_state != door_state)
-	  {
-		  previous_door_state = door_state;
-		  if(door_state == OPENED)
-		  {
-			  door_opening = true;
-		  } else if(door_state == CLOSED)
-		  {
-			  door_closure = true;
-		  }
-	  }
-
-	  door_cycle(true);
-
-	  if(send_messages == true)
-	  {
-		  send_messages = false;
-//		  uint16_t frq = get_cooling_frequency();
-		  uint16_t rpm = get_cooling_rpm();
-
-		  if(previous_led_color != led_color)
-		  {
-			  send_main_msg_led_color(led_color, &huart2);
-		  }
-
-		  send_sec_msg_air_extraction_tachymeter(rpm, &huart2);
-		  send_sec_msg_ee_temperature(ntc_values.temperatureC, &huart2);
-		  send_main_msg_pressure(pressure, &huart2);
-	  }
-
-	  if(watchdog_actived == true)
-	  {
-		  watchdog_actived = false;
-		  HAL_NVIC_SystemReset();
-	  }
-
-	  if(watchdog_update == true)
-	  {
-		  watchdog_update = false;
-		  update_last_watchdog_time();
 	  }
     /* USER CODE END WHILE */
 
@@ -483,6 +601,108 @@ static void MX_ADC1_Init(void)
   /* USER CODE BEGIN ADC1_Init 2 */
 
   /* USER CODE END ADC1_Init 2 */
+
+}
+
+/**
+  * @brief I2C1 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_I2C1_Init(void)
+{
+
+  /* USER CODE BEGIN I2C1_Init 0 */
+
+  /* USER CODE END I2C1_Init 0 */
+
+  /* USER CODE BEGIN I2C1_Init 1 */
+
+  /* USER CODE END I2C1_Init 1 */
+  hi2c1.Instance = I2C1;
+  hi2c1.Init.ClockSpeed = 100000;
+  hi2c1.Init.DutyCycle = I2C_DUTYCYCLE_2;
+  hi2c1.Init.OwnAddress1 = 0;
+  hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
+  hi2c1.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
+  hi2c1.Init.OwnAddress2 = 0;
+  hi2c1.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
+  hi2c1.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
+  if (HAL_I2C_Init(&hi2c1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN I2C1_Init 2 */
+
+  /* USER CODE END I2C1_Init 2 */
+
+}
+
+/**
+  * @brief I2C2 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_I2C2_Init(void)
+{
+
+  /* USER CODE BEGIN I2C2_Init 0 */
+
+  /* USER CODE END I2C2_Init 0 */
+
+  /* USER CODE BEGIN I2C2_Init 1 */
+
+  /* USER CODE END I2C2_Init 1 */
+  hi2c2.Instance = I2C2;
+  hi2c2.Init.ClockSpeed = 100000;
+  hi2c2.Init.DutyCycle = I2C_DUTYCYCLE_2;
+  hi2c2.Init.OwnAddress1 = 0;
+  hi2c2.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
+  hi2c2.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
+  hi2c2.Init.OwnAddress2 = 0;
+  hi2c2.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
+  hi2c2.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
+  if (HAL_I2C_Init(&hi2c2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN I2C2_Init 2 */
+
+  /* USER CODE END I2C2_Init 2 */
+
+}
+
+/**
+  * @brief I2C3 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_I2C3_Init(void)
+{
+
+  /* USER CODE BEGIN I2C3_Init 0 */
+
+  /* USER CODE END I2C3_Init 0 */
+
+  /* USER CODE BEGIN I2C3_Init 1 */
+
+  /* USER CODE END I2C3_Init 1 */
+  hi2c3.Instance = I2C3;
+  hi2c3.Init.ClockSpeed = 100000;
+  hi2c3.Init.DutyCycle = I2C_DUTYCYCLE_2;
+  hi2c3.Init.OwnAddress1 = 0;
+  hi2c3.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
+  hi2c3.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
+  hi2c3.Init.OwnAddress2 = 0;
+  hi2c3.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
+  hi2c3.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
+  if (HAL_I2C_Init(&hi2c3) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN I2C3_Init 2 */
+
+  /* USER CODE END I2C3_Init 2 */
 
 }
 
@@ -754,6 +974,44 @@ static void MX_TIM7_Init(void)
 }
 
 /**
+  * @brief TIM9 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM9_Init(void)
+{
+
+  /* USER CODE BEGIN TIM9_Init 0 */
+
+  /* USER CODE END TIM9_Init 0 */
+
+  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+
+  /* USER CODE BEGIN TIM9_Init 1 */
+
+  /* USER CODE END TIM9_Init 1 */
+  htim9.Instance = TIM9;
+  htim9.Init.Prescaler = 20-1;
+  htim9.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim9.Init.Period = 50000-1;
+  htim9.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim9.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim9) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim9, &sClockSourceConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM9_Init 2 */
+
+  /* USER CODE END TIM9_Init 2 */
+
+}
+
+/**
   * @brief TIM12 Initialization Function
   * @param None
   * @retval None
@@ -882,17 +1140,17 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(HEATER_GPIO_Port, HEATER_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pin : DOOR_LATCH_1_Pin */
-  GPIO_InitStruct.Pin = DOOR_LATCH_1_Pin;
+  /*Configure GPIO pin : DOOR_RIGHT_LATCH_Pin */
+  GPIO_InitStruct.Pin = DOOR_RIGHT_LATCH_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(DOOR_LATCH_1_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(DOOR_RIGHT_LATCH_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : DOOR_LATCH_2_Pin */
-  GPIO_InitStruct.Pin = DOOR_LATCH_2_Pin;
+  /*Configure GPIO pin : DOOR_LEFT_LATCH_Pin */
+  GPIO_InitStruct.Pin = DOOR_LEFT_LATCH_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(DOOR_LATCH_2_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(DOOR_LEFT_LATCH_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : DOOR_CMD_Pin */
   GPIO_InitStruct.Pin = DOOR_CMD_Pin;
@@ -927,6 +1185,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		{
 			send_messages = true;
 
+			if(get_i2c_values == false && var_timer_9_tick == 0) get_i2c_values = true;
+
 			if(last_watchdog_time > var_timer_4_tick)
 			{ // Clock overflow
 
@@ -945,6 +1205,11 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	if(htim->Instance == TIM7)
 	{
 		var_timer_7_tick += 1;
+	}
+
+	if(htim->Instance == TIM9)
+	{
+		var_timer_9_tick = true;
 	}
 }
 
@@ -985,7 +1250,7 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 
 			float refClock = TIMCLOCK/PRESCALER;
 
-			cooling_fan_frequency = refClock/difference_cooling;
+			cooling_frq = refClock/difference_cooling;
 
 			__HAL_TIM_SET_COUNTER(htim, 0);
 			is_first_captured_cooling = 0;

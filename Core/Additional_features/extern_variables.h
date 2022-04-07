@@ -27,7 +27,7 @@ extern uint8_t light_color;
 extern UART_HandleTypeDef huart2;
 extern UART_HandleTypeDef huart5;
 
-//Variables used to get frequency
+//Variables used to get SMART_SENSOR_frequency
 extern int ic_val1_cooling, ic_val2_cooling, difference_cooling, is_first_captured_cooling;
 extern int ic_val1_heater, ic_val2_heater, difference_heater, is_first_captured_heater;
 extern int frequency;// for PWM of fans
@@ -63,5 +63,21 @@ extern uint64_t var_timer_7_tick;
 
 //For thermistor, pressure
 extern ADC_HandleTypeDef hadc1;
+
+//For temperature and humidity : Smart Power
+extern I2C_HandleTypeDef hi2c1;
+/*   Struct used to return a "tuple"    */
+typedef struct i2C1_temp_humi {
+	float temperature;
+	float humidity;
+	bool error_status;
+} Struct_TH;
+
+//Smart Sensor 1
+extern I2C_HandleTypeDef hi2c2;
+
+//Temperature
+extern uint8_t desired_temperature;
+extern bool heater_activated;
 
 #endif /* ADDITIONAL_FEATURES_EXTERN_VARIABLES_H_ */

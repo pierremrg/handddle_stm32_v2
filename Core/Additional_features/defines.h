@@ -15,6 +15,15 @@
 #define ONE									0x01
 #define TWO									0x02
 
+#define FIRST_BYTE							0
+#define SECOND_BYTE							1
+#define THIRD_BYTE							2
+#define FOURTH_BYTE							3
+#define FIFTH_BYTE							4
+#define SIXTH_BYTE							5
+#define SEVENTH_BYTE						6
+#define LAST_BYTE							7
+
 #define DEFAULT_ACK_VALUE 					0x01
 #define DEFAULT_TIMEOUT 					200
 
@@ -60,5 +69,23 @@
 #define FIRST_CONST_750						750
 #define SECOND_CONST_150					150
 
+//For Smart Power
+#define BYTES_TO_TRANSMIT_SHT40				1
+#define BYTES_TO_READ_SHT40					6
+#define SHT40_COMMAND						0xFD
+#define FIRST_CONST_175						175
+#define SECOND_CONST_65535					65535
+#define THIRD_CONST_45						45
+#define FOURTH_CONST_125					125
+#define FIFTH_CONST_6						6
+
+//For heater temperature
+#define DELTA_INERTIA						0.5
+#define PWM_HEATER_80						80
+#define PWM_HEATER_10						10
+#define PWM_COOLING_100						100
+#define PWM_COOLING_30						30
+#define DESIRED_TEMP_MIN					10
+#define DESIRED_TEMP_MAX					50
 
 #endif /* ADDITIONAL_FEATURES_DEFINES_H_ */

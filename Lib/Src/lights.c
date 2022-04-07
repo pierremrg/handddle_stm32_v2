@@ -125,10 +125,10 @@ void set_lights(int color)
 	    	break;
 
 	    case BLUE_HANDDDLE:
-	    	htim1.Instance->CCR4 = 14; //Modulation
-	    	htim1.Instance->CCR3 = 90; //Modulation
-	    	htim1.Instance->CCR2 = 45; //Modulation
-	    	htim12.Instance->CCR1 = 0; //Modulation
+	    	htim1.Instance->CCR4 = 0; //Modulation  		14
+	    	htim1.Instance->CCR3 = 79; //Modulation 		90
+	    	htim1.Instance->CCR2 = 75; //Modulation 		45
+	    	htim12.Instance->CCR1 = 0; //Modulation			0
 	    	break;
 
 	    case DARK:

@@ -12,42 +12,43 @@
 #include "../../Transport/uid.h"
 
 
-bool get_door_latch_1(void)
+bool get_door_right_latch_state(void)
 {
-	bool latch_1;
-	// Latch State 1
-	if(HAL_GPIO_ReadPin(DOOR_LATCH_1_GPIO_Port, DOOR_LATCH_1_Pin))
-		latch_1 = PRESENT;
-	else
-		latch_1 = NOT_PRESENT;
+	bool right_latch;
 
-	return latch_1;
+	if(HAL_GPIO_ReadPin(DOOR_RIGHT_LATCH_GPIO_Port, DOOR_RIGHT_LATCH_Pin))
+		right_latch = PRESENT;
+	else
+		right_latch = NOT_PRESENT;
+
+	return right_latch;
 }
 
-bool get_door_latch_2(void)
+bool get_door_left_latch_state(void)
 {
-	bool latch_2;
-	// Latch State 2
-	if(HAL_GPIO_ReadPin(DOOR_LATCH_2_GPIO_Port, DOOR_LATCH_2_Pin))
-		latch_2 = PRESENT;
-	else
-		latch_2 = NOT_PRESENT;
+	bool left_latch;
 
-	return latch_2;
+	if(HAL_GPIO_ReadPin(DOOR_LEFT_LATCH_GPIO_Port, DOOR_LEFT_LATCH_Pin))
+		left_latch = PRESENT;
+	else
+		left_latch = NOT_PRESENT;
+
+	return left_latch;
 }
 
 uint8_t get_latches_state(void)
 {
-	bool latch_1 = get_door_latch_1();
-	bool latch_2 = get_door_latch_2();
+	bool right_latch = get_door_right_latch_state();
+	bool left_latch = get_door_left_latch_state();
 	uint8_t latches;
 
-	if((latch_1 == PRESENT) && (latch_2 == PRESENT))
+	if((right_latch == PRESENT) && (left_latch == PRESENT))
 		latches = PRESENT;
-	else if((latch_1 == NOT_PRESENT) && (latch_2 == NOT_PRESENT))
+	else if((right_latch == NOT_PRESENT) && (left_latch == NOT_PRESENT))
 		latches = NOT_PRESENT;
 	else
 		latches = LATCH_ERROR;
+
 
 	return latches;
 }

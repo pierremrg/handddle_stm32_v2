@@ -37,6 +37,12 @@ int get_heater_rpm(void);
  */
 void set_heater(bool command);
 
-
+/*	@fn 	void set_temperature(uint8_t desired_temp, float smart_power_temperature, float smart_sensor_temperature);
+ * 	@brief 	Function used to set the desired temperature
+ * 	@param	desired_temp is the desired temperature to reach
+ * 	@param	smart_power_temperature.
+ * 	@param	smart_sensor_temperature.
+ */
+void set_temperature(uint8_t desired_temp, float smart_power_temperature, float smart_sensor_temperature);
 
 #endif /* INC_HEATER_FAN_H_ */

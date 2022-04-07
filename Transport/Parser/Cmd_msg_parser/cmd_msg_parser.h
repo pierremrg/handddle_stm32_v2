@@ -17,7 +17,6 @@ bool watchdog_actived;
 bool watchdog_update;
 
 uint8_t pwm_cooling_fan;
-uint8_t pwm_heater_fan;
 
 uint8_t led_color;
 
@@ -33,6 +32,8 @@ bool sm_repeat;
 
 bool door_command;
 bool door_state;
+
+uint8_t desired_temperature;
 
 
 /** @def CMD_ACK
@@ -55,10 +56,10 @@ bool door_state;
  */
 #define CMD_COOLING_FAN 							0x03
 
-/** @def CMD_HEATER_FAN
- *  @brief Command ID to run the heater fan at given dutycyle
+/** @def CMD_TEMPERATURE
+ *  @brief Command ID to set desired temperature heater
  */
-#define CMD_HEATER_FAN 								0x04
+#define CMD_TEMPERATURE 							0x04
 
 /** @def CMD_LIGHT_COLOR
  *  @brief Command ID to set a color
@@ -117,12 +118,12 @@ void parser_cmd_force_reset(uint8_t * rx_buff,UART_HandleTypeDef * uart);
  */
 void parser_cmd_cooling_fan(uint8_t * rx_buff,UART_HandleTypeDef * uart);
 
-/*	@fn 	void parser_cmd_heater_fan(uint8_t * rx_buff,UART_HandleTypeDef * uart)
+/*	@fn 	void parser_cmd_heater_temperature(uint8_t * rx_buff,UART_HandleTypeDef * uart)
  *	@brief 	Function used to parse the command value to send to the heater fan
  *	@param	rx_buff Pointer to the array tab containing the message received
  *	@param	uart Uart strcture used to the communication with the Jetson Nano. If the cable used is the ST-Link, huart2
  */
-void parser_cmd_heater_fan(uint8_t * rx_buff,UART_HandleTypeDef * uart);
+void parser_cmd_heater_temperature(uint8_t * rx_buff,UART_HandleTypeDef * uart);
 
 /*	@fn 	void parser_cmd_led_color(uint8_t * rx_buff,UART_HandleTypeDef * uart)
  *	@brief 	Function used to parse the command value to send to the register of timer (to set a color)

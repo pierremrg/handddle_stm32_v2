@@ -25,16 +25,16 @@ uint64_t var_timer_7_tick;
 #define INC_DOOR_H_
 
 /*	@fn 	bool get_latch_state_2(void);
- * 	@brief 	Function used to know if the left/right door latch is locked or not
+ * 	@brief 	Function used to know if the left door latch is locked or not
  * 	@retval return true (locked) or false (unlocked)
  */
-bool get_door_latch_state_2(void);
+bool get_door_left_latch_state(void);
 
 /*	@fn 	bool get_latch_state_1(void);
- * 	@brief 	Function used to know if the left/right door latch is locked or not
+ * 	@brief 	Function used to know if the right door latch is locked or not
  * 	@retval return true (locked) or false (unlocked)
  */
-bool get_door_latch_state_1(void);
+bool get_door_right_latch_state(void);
 
 /*	@fn 	uint8_t get_latches_state(void);
  * 	@brief 	Function used to know if the door is opened, close or in error
