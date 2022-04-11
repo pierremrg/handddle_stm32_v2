@@ -29,6 +29,7 @@
 #include "../../Transport/Parser/parser.h"
 #include "../../Transport/Msg_gen/Sec_msg_gen/sec_msg_gen.h"
 #include "../../Transport/Msg_gen/Main_msg_gen/main_msg_gen.h"
+#include "../../Transport/Msg_gen/Error_msg_gen/error_msg_gen.h"
 
 #include "../../Lib/Inc/cooling_fan.h"
 #include "../../Lib/Inc/heater_fan.h"
@@ -158,6 +159,8 @@ bool door_state;
 bool previous_door_state;
 bool door_closure = false;
 bool door_opening = false;
+bool left_latch_error, right_latch_error;
+bool left_latch_state, right_latch_state;
 
 //thermistor
 ntc_thermistor_values ntc_values;
@@ -432,6 +435,31 @@ int main(void)
 			  //Relay
 			  send_main_msg_relay(relay_command, &huart2);
 
+			  //Error messages
+			  if(left_latch_error)
+			  {
+				  left_latch_error = false;
+				  send_error_msg_left_latch(&huart2);
+			  }
+			  if(right_latch_error)
+			  {
+				  right_latch_error = false;
+				  send_error_msg_right_latch(&huart2);
+			  }
+			  if(return_value_SP == HAL_ERROR || return_value_SP == HAL_BUSY || temp_humi_SP.error_status == true)
+			  {
+				  send_error_msg_i2c_smart_power(&huart2);
+			  }
+			  if(return_value_SS_1 == HAL_ERROR || return_value_SS_1 == HAL_BUSY || temp_humi_SS_1.error_status == true)
+			  {
+				  send_error_msg_i2c_smart_sensor_1(&huart2);
+			  }
+			  if(return_value_SS_2 == HAL_ERROR || return_value_SS_2 == HAL_BUSY || temp_humi_SS_2.error_status == true)
+			  {
+				  send_error_msg_i2c_smart_sensor_2(&huart2);
+			  }
+
+
 
 
 			  /*
@@ -451,8 +479,6 @@ int main(void)
 		  }
 	  } else
 	  {
-//		  led_color_system_off = DARK; //no problem w/ the ligths if i add this variable
-
 		  set_cooling_fan_pwm(PWM_STOP, &htim2);
 		  set_heater_fan_pwm(PWM_STOP, &htim2);
 		  set_heater(false);
@@ -534,6 +560,12 @@ int main(void)
 	  //Average temperature and humidity
 	  average_humidity = (temp_humi_SP.humidity + temp_humi_SS_1.humidity) / (float)TWO;
 	  average_temperature = (temp_humi_SP.temperature + temp_humi_SS_1.temperature) / (float)TWO;
+
+	  //door latches
+	  left_latch_state = get_door_left_latch_state();
+	  right_latch_state = get_door_right_latch_state();
+
+
 
 	  /*
 	   * 		Sound module

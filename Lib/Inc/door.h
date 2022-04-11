@@ -16,6 +16,9 @@ uint8_t led_color;
 bool door_state;
 bool door_init;
 
+uint8_t latches_state;
+bool left_latch_error, right_latch_error;
+
 bool door_closure;
 bool door_opening;
 

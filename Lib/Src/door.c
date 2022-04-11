@@ -11,6 +11,8 @@
 
 #include "../../Transport/uid.h"
 
+#include "../../Transport/Msg_gen/Error_msg_gen/error_msg_gen.h"
+
 
 bool get_door_right_latch_state(void)
 {
@@ -64,7 +66,7 @@ void set_door_lock(bool cmd_door_closed)
 
 void door_cycle(bool door_cycle_on)
 {
-	uint8_t latches_state = get_latches_state();
+	latches_state = get_latches_state();
 
 	if(door_opening)
 	{
@@ -110,11 +112,17 @@ void door_cycle(bool door_cycle_on)
 		door_state = OPENED;
 		led_color = WHITE;
 
+		left_latch_error = false;
+		right_latch_error = false;
+
 		if(var_timer_7_tick == ZERO) HAL_TIM_Base_Start_IT(&htim7);
 
 	} else if(latches_state == PRESENT)
 	{
 		door_state = CLOSED;
+
+		left_latch_error = false;
+		right_latch_error = false;
 
 		if(var_timer_7_tick != ZERO && MSG_HEADER_UID_1_TYPOLOGY == TYPE_MACHINE_ROOF)
 		{
@@ -126,7 +134,11 @@ void door_cycle(bool door_cycle_on)
 			pwm_cooling_fan = PWM_STOP;
 			var_timer_7_tick = ZERO;
 		}
+	} else {
+		left_latch_error = true;
+		right_latch_error = true;
 	}
+
 
 	if(door_state == OPENED)
 	{

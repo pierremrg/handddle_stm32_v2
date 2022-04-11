@@ -55,6 +55,7 @@ extern bool door_closure;
 extern bool door_opening;
 extern bool door_state;
 extern bool previous_door_state;
+extern bool left_latch_error, right_latch_error;
 extern TIM_HandleTypeDef htim7;
 extern uint64_t var_timer_7_tick;
 
