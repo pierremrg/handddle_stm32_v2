@@ -153,6 +153,16 @@ void parser_cmd_sound_module_repeat(uint8_t * rx_buff,UART_HandleTypeDef * uart)
 	}
 }
 
+void parser_cmd_on_off(uint8_t * rx_buff, UART_HandleTypeDef * uart)
+{
+	uint8_t data = rx_buff[DATA];
+
+	if(data == SYSTEM_ON || data == SYSTEM_OFF)
+	{
+		system_on_off = data;
+	}
+}
+
 
 
 
@@ -209,6 +219,10 @@ void parser_cmd(uint8_t * rx_buff, UART_HandleTypeDef * uart){
 	case CMD_RELAY:
 		send_cmd_ack(uart);
 		parser_cmd_relay(rx_buff, uart);
+		break;
+	case CMD_ON_OFF:
+		send_cmd_ack(uart);
+		parser_cmd_on_off(rx_buff, uart);
 		break;
 	default:
 		send_cmd_nok(uart);

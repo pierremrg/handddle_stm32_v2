@@ -20,9 +20,6 @@ extern uint8_t previous_pwm_heater_fan;
 extern uint8_t pwm_cooling_fan;
 extern uint8_t pwm_heater_fan;
 
-// For light color
-extern uint8_t light_color;
-
 //for UART
 extern UART_HandleTypeDef huart2;
 extern UART_HandleTypeDef huart5;
@@ -92,5 +89,8 @@ typedef struct {
 
 //For relay
 bool relay_command;
+
+//System On/Off
+bool system_on_off;
 
 #endif /* ADDITIONAL_FEATURES_EXTERN_VARIABLES_H_ */

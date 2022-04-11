@@ -12,6 +12,9 @@
 
 #define WATCHDOG_TIME						10
 
+#define SYSTEM_ON							true
+#define SYSTEM_OFF							false
+
 #define ZERO 								0x00
 #define ONE									0x01
 #define TWO									0x02

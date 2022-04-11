@@ -199,6 +199,9 @@ bool sgp41_tick = true;
 //relay
 bool relay_command = RELAY_ON;
 
+//Sytem
+bool system_on_off = SYSTEM_ON;
+
 /* USER CODE END 0 */
 
 /**
@@ -329,6 +332,133 @@ int main(void)
   while (1)
   {
 	  /*
+	   * SYSTEM
+	   */
+	  if(system_on_off == SYSTEM_ON)
+	  {
+		  /*
+		   * 		Apply functions
+		   */
+		  set_cooling_fan_pwm(pwm_cooling_fan, &htim2);
+		  set_heater_fan_pwm(pwm_heater_fan, &htim2);
+		  set_heater(heater_activated);
+		  set_lights(led_color);
+		  set_door_lock(door_command);
+		  if(MSG_HEADER_UID_1_TYPOLOGY == TYPE_MACHINE_ROOF || MSG_HEADER_UID_1_TYPOLOGY == TYPE_POST_TREATMENT) door_cycle(true);
+
+		  if(desired_temperature >= DESIRED_TEMP_MIN && desired_temperature <= DESIRED_TEMP_MAX && door_state == CLOSED)
+		  {
+			  set_temperature(desired_temperature, temp_humi_SP.temperature, temp_humi_SS_1.temperature);
+		  } else
+		  {
+			  heater_activated = false;
+			  pwm_heater_fan = PWM_HEATER_10;
+		  }
+		  set_relay_on(relay_command);
+
+
+
+		  /*
+		   * 		Assign variables
+		   */
+
+		  if(previous_door_state != door_state)
+		  {
+			  previous_door_state = door_state;
+			  if(door_state == OPENED)
+			  {
+				  door_opening = true;
+			  } else if(door_state == CLOSED)
+			  {
+				  door_closure = true;
+			  }
+		  }
+
+		  if(led_color_buffer != led_color) // Store previous led color
+		  {
+			  previous_led_color = led_color_buffer;
+			  led_color_buffer = led_color;
+		  }
+
+
+
+		  /*
+		   * 		Sending datas
+		   */
+		  if(send_messages == true)
+		  {
+			  send_messages = false;
+
+			  send_sec_msg_air_extraction_tachymeter(cooling_rpm, &huart2);
+			  send_sec_msg_ee_temperature(ntc_values.temperatureC, &huart2);
+			  send_main_msg_pressure(pressure, &huart2);
+
+			  //Smart Light
+			  if(previous_led_color != led_color)
+			  {
+				  send_main_msg_led_color(led_color, &huart2);
+			  }
+
+			  // Smart Power
+			  if(return_value_SP == HAL_OK && temp_humi_SP.error_status == false)
+			  {
+				  send_main_msg_humidity(temp_humi_SP.humidity, MAIN_MSG_HUMIDITY_SP, &huart2);
+				  send_main_msg_temperature(temp_humi_SP.temperature, MAIN_MSG_TEMPERATURE_SP, &huart2);
+			  }
+
+			  // Smart Sensor 1
+			  if(return_value_SS_1 == HAL_OK && temp_humi_SS_1.error_status == false)
+			  {
+				  send_main_msg_humidity(temp_humi_SS_1.humidity, MAIN_MSG_HUMIDITY_SS_1, &huart2);
+				  send_main_msg_temperature(temp_humi_SS_1.temperature, MAIN_MSG_TEMPERATURE_SS_1, &huart2);
+			  }
+
+			  // Smart Sensor 2
+			  if(MSG_HEADER_UID_1_TYPOLOGY == TYPE_MACHINE_ROOF &&
+					  return_value_SS_2 == HAL_OK && temp_humi_SS_2.error_status == false)
+			  {
+				  send_main_msg_humidity(temp_humi_SS_2.humidity, MAIN_MSG_HUMIDITY_SS_2, &huart2);
+				  send_main_msg_temperature(temp_humi_SS_2.temperature, MAIN_MSG_TEMPERATURE_SS_2, &huart2);
+			  }
+
+			  //SGP41
+			  if(var_timer_4_tick > (SGP41_CONDITIONNING_TIME + SGP41_SRAW_FEEDING_TIME))
+			  {
+				  send_main_msg_nox(nox_index_value, &huart2);
+				  send_main_msg_voc(voc_index_value, &huart2);
+			  }
+
+			  //Relay
+			  send_main_msg_relay(relay_command, &huart2);
+
+
+
+			  /*
+			   * 		Watchdog
+			   */
+			  if(watchdog_actived == true)
+			  {
+				  watchdog_actived = false;
+				  HAL_NVIC_SystemReset();
+			  }
+
+			  if(watchdog_update == true)
+			  {
+				  watchdog_update = false;
+				  update_last_watchdog_time();
+			  }
+		  }
+	  } else
+	  {
+		  set_cooling_fan_pwm(PWM_STOP, &htim2);
+		  set_heater_fan_pwm(PWM_STOP, &htim2);
+		  set_heater(false);
+		  set_lights(DARK);
+		  set_relay_on(RELAY_OFF);
+	  }
+
+
+	  /*
 	   * 	Reading Datas
 	   */
 	  if(uart2_irq_is_captured == true)
@@ -401,116 +531,6 @@ int main(void)
 	  //Average temperature and humidity
 	  average_humidity = (temp_humi_SP.humidity + temp_humi_SS_1.humidity) / (float)TWO;
 	  average_temperature = (temp_humi_SP.temperature + temp_humi_SS_1.temperature) / (float)TWO;
-
-
-
-	  /*
-	   * 		Apply functions
-	   */
-	  set_cooling_fan_pwm(pwm_cooling_fan, &htim2);
-	  set_heater_fan_pwm(pwm_heater_fan, &htim2);
-	  set_heater(heater_activated);
-	  set_lights(led_color);
-	  set_door_lock(door_command);
-	  if(MSG_HEADER_UID_1_TYPOLOGY == TYPE_MACHINE_ROOF || MSG_HEADER_UID_1_TYPOLOGY == TYPE_POST_TREATMENT) door_cycle(true);
-
-	  if(desired_temperature >= DESIRED_TEMP_MIN && desired_temperature <= DESIRED_TEMP_MAX && door_state == CLOSED)
-	  {
-		  set_temperature(desired_temperature, temp_humi_SP.temperature, temp_humi_SS_1.temperature);
-	  } else
-	  {
-		  heater_activated = false;
-		  pwm_heater_fan = PWM_HEATER_10;
-	  }
-	  set_relay_on(relay_command);
-
-
-	  /*
-	   * 		Assign variables
-	   */
-
-	  if(previous_door_state != door_state)
-	  {
-		  previous_door_state = door_state;
-		  if(door_state == OPENED)
-		  {
-			  door_opening = true;
-		  } else if(door_state == CLOSED)
-		  {
-			  door_closure = true;
-		  }
-	  }
-
-	  if(led_color_buffer != led_color) // Store previous led color
-	  {
-		  previous_led_color = led_color_buffer;
-		  led_color_buffer = led_color;
-	  }
-
-	  /*
-	   * 		Sending datas
-	   */
-	  if(send_messages == true)
-	  {
-		  send_messages = false;
-
-		  send_sec_msg_air_extraction_tachymeter(cooling_rpm, &huart2);
-		  send_sec_msg_ee_temperature(ntc_values.temperatureC, &huart2);
-		  send_main_msg_pressure(pressure, &huart2);
-
-		  //Smart Light
-		  if(previous_led_color != led_color)
-		  {
-			  send_main_msg_led_color(led_color, &huart2);
-		  }
-
-		  // Smart Power
-		  if(return_value_SP == HAL_OK && temp_humi_SP.error_status == false)
-		  {
-			  send_main_msg_humidity(temp_humi_SP.humidity, MAIN_MSG_HUMIDITY_SP, &huart2);
-			  send_main_msg_temperature(temp_humi_SP.temperature, MAIN_MSG_TEMPERATURE_SP, &huart2);
-		  }
-
-		  // Smart Sensor 1
-		  if(return_value_SS_1 == HAL_OK && temp_humi_SS_1.error_status == false)
-		  {
-			  send_main_msg_humidity(temp_humi_SS_1.humidity, MAIN_MSG_HUMIDITY_SS_1, &huart2);
-			  send_main_msg_temperature(temp_humi_SS_1.temperature, MAIN_MSG_TEMPERATURE_SS_1, &huart2);
-		  }
-
-		  // Smart Sensor 2
-		  if(MSG_HEADER_UID_1_TYPOLOGY == TYPE_MACHINE_ROOF &&
-				  return_value_SS_2 == HAL_OK && temp_humi_SS_2.error_status == false)
-		  {
-			  send_main_msg_humidity(temp_humi_SS_2.humidity, MAIN_MSG_HUMIDITY_SS_2, &huart2);
-			  send_main_msg_temperature(temp_humi_SS_2.temperature, MAIN_MSG_TEMPERATURE_SS_2, &huart2);
-		  }
-
-		  //SGP41
-		  if(var_timer_4_tick > (SGP41_CONDITIONNING_TIME + SGP41_SRAW_FEEDING_TIME))
-		  {
-			  send_main_msg_nox(nox_index_value, &huart2);
-			  send_main_msg_voc(voc_index_value, &huart2);
-		  }
-
-		  //Relay
-		  send_main_msg_relay(relay_command, &huart2);
-	  }
-
-	  /*
-	   * 		Watchdog
-	   */
-	  if(watchdog_actived == true)
-	  {
-		  watchdog_actived = false;
-		  HAL_NVIC_SystemReset();
-	  }
-
-	  if(watchdog_update == true)
-	  {
-		  watchdog_update = false;
-		  update_last_watchdog_time();
-	  }
 
 	  /*
 	   * 		Sound module

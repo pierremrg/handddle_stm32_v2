@@ -193,6 +193,13 @@ void parser_cmd_sound_module_select_track(uint8_t * rx_buff,UART_HandleTypeDef *
  */
 void parser_cmd_sound_module_repeat(uint8_t * rx_buff,UART_HandleTypeDef * uart);
 
+/*	@fn 	void parser_cmd_on_off(uint8_t * rx_buff,UART_HandleTypeDef * uart)
+ *	@brief 	Function used to put the system on or off
+ *	@param	rx_buff Pointer to the array tab containing the message received
+ *	@param	uart Uart strcture used to the communication with the Jetson Nano. If the cable used is the ST-Link, huart2
+ */
+void parser_cmd_on_off(uint8_t * rx_buff, UART_HandleTypeDef * uart);
+
 
 
 
