@@ -38,6 +38,7 @@
 #include "../../Lib/Inc/i2c.h"
 #include "../../Lib/Inc/pressure.h"
 #include "../../Lib/Inc/thermistor.h"
+#include "../../Lib/Inc/gas_index_algorithm.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -179,6 +180,20 @@ HAL_StatusTypeDef return_value_SP, return_value_SS_1, return_value_SS_2;
 //temperature
 uint8_t desired_temperature = 0;
 bool heater_activated = false;
+float average_temperature = 0, average_humidity = 0;
+
+//Sgp41
+HAL_StatusTypeDef sgp41_return_value;
+struct_VN pollution_data;
+GasIndexAlgorithmParams params_voc;
+GasIndexAlgorithmParams params_nox;
+int32_t voc_index_value;
+int32_t nox_index_value;
+uint16_t sraw_voc;
+uint16_t sraw_nox;
+uint8_t sgp41_timer_init = 0;
+uint8_t sgp41_timer_feeding = 0;
+bool sgp41_tick = true;
 
 /* USER CODE END 0 */
 
@@ -296,6 +311,10 @@ int main(void)
 	  }
   }
 
+  //sgp41 INIT
+  GasIndexAlgorithm_init(&params_voc, GasIndexAlgorithm_ALGORITHM_TYPE_VOC);
+  GasIndexAlgorithm_init(&params_nox, GasIndexAlgorithm_ALGORITHM_TYPE_NOX);
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -330,7 +349,11 @@ int main(void)
 		  return_value_SS_1 = write_frame_temp_humi_SHT40(&hi2c2);
 		  return_value_SS_2 = write_frame_temp_humi_SHT40(&hi2c3);
 
-		  HAL_TIM_Base_Start_IT(&htim9); // Start this timer to get all temperatures
+		  /* SGP41 */
+		  if(sgp41_timer_init >= SGP41_CONDITIONNING_TIME) //if init is finished
+			  sgp41_return_value = sgp41_send_command(&hi2c2, SGP41_MEASUREMENT_COMMAND, average_temperature, average_humidity);
+
+		  HAL_TIM_Base_Start_IT(&htim9); // Start this timer to get all i2c values
 	  }
 
 	  if(var_timer_9_tick)	  //the timer 9 start if get_i2c_values = true and tick 50ms after that all frames are sent.
@@ -341,6 +364,15 @@ int main(void)
 		  temp_humi_SP = read_temp_humi_SHT40(&hi2c1);
 		  temp_humi_SS_1 = read_temp_humi_SHT40(&hi2c2);
 		  temp_humi_SS_2 = read_temp_humi_SHT40(&hi2c3);
+
+		  // if init is finished and i2c communication is established
+		  if(sgp41_timer_init >= SGP41_CONDITIONNING_TIME && sgp41_return_value == HAL_OK)
+		 {
+			  pollution_data = sgp41_receive_raw_datas(&hi2c2);
+
+		      GasIndexAlgorithm_process(&params_nox, pollution_data.sraw_nox, &nox_index_value);
+		      GasIndexAlgorithm_process(&params_voc, pollution_data.sraw_voc, &voc_index_value);
+		 }
 	  }
 
 	  cooling_frq = get_cooling_frequency();
@@ -349,6 +381,19 @@ int main(void)
 	  ntc_values = applying_coefficients(adc_temperature_raw_value);
 	  ntc_values.temperatureC = temperature_calculation(ntc_values);
 	  if(MSG_HEADER_UID_1_TYPOLOGY == TYPE_MACHINE_ROOF || MSG_HEADER_UID_1_TYPOLOGY == TYPE_POST_TREATMENT) door_state = get_latches_state();
+
+	  //Initialization of sgp41
+	  if(sgp41_tick && sgp41_timer_init < SGP41_CONDITIONNING_TIME)
+	  {
+		  sgp41_tick = false;
+		  sgp41_timer_init += ONE;
+
+		  sgp41_return_value = sgp41_send_command(&hi2c2, SGP41_INITIALIZATION_COMMAND, SGP41_INIT_TEMPERATURE, SGP41_INIT_HUMIDITY);
+	  }
+
+	  //Average temperature and humidity
+	  average_humidity = (temp_humi_SP.humidity + temp_humi_SS_1.humidity) / (float)TWO;
+	  average_temperature = (temp_humi_SP.temperature + temp_humi_SS_1.temperature) / (float)TWO;
 
 
 
@@ -431,6 +476,13 @@ int main(void)
 		  {
 			  send_main_msg_humidity(temp_humi_SS_2.humidity, MAIN_MSG_HUMIDITY_SS_2, &huart2);
 			  send_main_msg_temperature(temp_humi_SS_2.temperature, MAIN_MSG_TEMPERATURE_SS_2, &huart2);
+		  }
+
+		  //SGP41
+		  if(var_timer_4_tick > (SGP41_CONDITIONNING_TIME + SGP41_SRAW_FEEDING_TIME))
+		  {
+			  send_main_msg_nox(nox_index_value, &huart2);
+			  send_main_msg_voc(voc_index_value, &huart2);
 		  }
 	  }
 
@@ -1181,32 +1233,40 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	if(htim->Instance == TIM4)
 	{
 
-		if(var_timer_4_tick % TWO == 0) // each 2s
+		//each
+		if(var_timer_4_tick % TWO == ZERO) // each 2s
 		{
 			send_messages = true;
-
-			if(get_i2c_values == false && var_timer_9_tick == 0) get_i2c_values = true;
 
 			if(last_watchdog_time > var_timer_4_tick)
 			{ // Clock overflow
 
-				last_watchdog_time = 0;
+				last_watchdog_time = ZERO;
 			}
-			if(var_timer_4_tick - last_watchdog_time > 10)
-			{ // Watchdog 10s
+			if(var_timer_4_tick - last_watchdog_time > WATCHDOG_TIME)
+			{
 
 				watchdog_actived = true;
 			}
 		}
 
+		//I2C
+		if(get_i2c_values == false && var_timer_9_tick == ZERO) get_i2c_values = true;
+
+		//SGP41
+		if(sgp41_timer_init < SGP41_CONDITIONNING_TIME) sgp41_tick = true;
+
 		var_timer_4_tick += 1;
 	}
 
+
+	//each second : DOOR
 	if(htim->Instance == TIM7)
 	{
 		var_timer_7_tick += 1;
 	}
 
+	//each 50ms : I2C
 	if(htim->Instance == TIM9)
 	{
 		var_timer_9_tick = true;

@@ -20,10 +20,10 @@
  */
 #define MAIN_MSG_NOX 0x02
 
-/*  @def 	MAIN_MSG_SPG_INITIALIZATION
- *  @brief 	Main message ID for the sgp initialization time main message
+/*  @def 	MAIN_MSG_RELAY
+ *  @brief 	Main message ID for the relay main message
  */
-#define MAIN_MSG_SPG_INITIALIZATION 0x03
+#define MAIN_MSG_RELAY 0x03
 
 /*  @def 	MAIN_MSG_HUMIDITY_SP
  *  @brief 	Main message ID for the humidity main message (from SMART POWER)
@@ -83,14 +83,6 @@ HAL_StatusTypeDef send_main_msg_nox(uint16_t nox,UART_HandleTypeDef * uart );
  * @return 	HAL_ERROR if something went wrong; HAL_OK if every went well
  */
 HAL_StatusTypeDef send_main_msg_voc(uint16_t voc,UART_HandleTypeDef * uart );
-
-/* @fn 		HAL_StatusTypeDef send_main_msg_sgp_initialization(bool sgp_initialization,UART_HandleTypeDef * uart )
- * @brief 	Function used to send the sgp_initialization value message
- * @param 	sgp_initialization is the value to be sent
- * @param 	uart Uart structure used to the communication with the Jetson Nano
- * @return 	HAL_ERROR if something went wrong; HAL_OK if every went well
- */
-HAL_StatusTypeDef send_main_msg_sgp_initialization(bool sgp_initialization,UART_HandleTypeDef * uart );
 
 /* @fn 		HAL_StatusTypeDef send_main_msg_temperature(double temperature, uint8_t MAIN_MSG_ID, UART_HandleTypeDef * uart );
  * @brief 	Function used to send the temperature value message

@@ -80,4 +80,14 @@ extern I2C_HandleTypeDef hi2c2;
 extern uint8_t desired_temperature;
 extern bool heater_activated;
 
+//For SGP41
+typedef struct {
+
+	uint16_t sraw_voc;
+	uint16_t sraw_nox;
+	uint8_t	cmd_init[SGP41_BYTES_TO_TRANSMIT];
+	bool error_status; // 0 or 1
+
+} struct_VN;
+
 #endif /* ADDITIONAL_FEATURES_EXTERN_VARIABLES_H_ */

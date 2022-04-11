@@ -33,7 +33,7 @@ HAL_StatusTypeDef send_main_msg_nox(uint16_t nox,UART_HandleTypeDef * uart ){
 		MSG_HEADER_UID_1_TYPOLOGY, MSG_HEADER_UID_2_MONTH, MSG_HEADER_UID_3_YEAR, MSG_HEADER_UID_4_ID,  // UID of the STM32
 		MSG_TYPE_MAIN, // Message type
 		MAIN_MSG_NOX, // Sub message type
-		MSG_LENGTH_FIRST_BYTE, MSG_LENGTH_1_SECOND_BYTE // Length
+		MSG_LENGTH_FIRST_BYTE, MSG_LENGTH_2_SECOND_BYTE // Length
 	}; // 12 first bytes
 
 	Tx_msg_nox[DATA] = nox >> BYTE_OFFSET;
@@ -63,24 +63,6 @@ HAL_StatusTypeDef send_main_msg_voc(uint16_t voc,UART_HandleTypeDef * uart ){
 
 	Tx_msg_voc[MSG_SIZE] = '\n';
 	return HAL_UART_Transmit(uart,Tx_msg_voc,MSG_SIZE+OFFSET_OF_1,DEFAULT_TIMEOUT);
-}
-
-HAL_StatusTypeDef send_main_msg_sgp_initialization(bool sgp_initialization,UART_HandleTypeDef * uart ){
-	uint8_t Tx_msg_sgp_init[MSG_SIZE + OFFSET_OF_1] = {
-		MSG_HEADER_IDENTIFIER_FIRST_BYTE, MSG_HEADER_IDENTIFIER_SECOND_BYTE, MSG_HEADER_SIZE_FIRST_BYTE, MSG_HEADER_SIZE_SECOND_BYTE, // Global information
-		MSG_HEADER_UID_1_TYPOLOGY, MSG_HEADER_UID_2_MONTH, MSG_HEADER_UID_3_YEAR, MSG_HEADER_UID_4_ID,  // UID of the STM32
-		MSG_TYPE_MAIN, // Message type
-		MAIN_MSG_SPG_INITIALIZATION, // Sub message type
-		MSG_LENGTH_FIRST_BYTE, MSG_LENGTH_1_SECOND_BYTE // Length
-	}; // 12 first bytes
-
-	Tx_msg_sgp_init[DATA] = sgp_initialization;
-
-	for(int i = DATA + OFFSET_OF_1; i< MSG_SIZE; i++)
-		Tx_msg_sgp_init[i] = ZERO;
-
-	Tx_msg_sgp_init[MSG_SIZE] = '\n';
-	return HAL_UART_Transmit(uart,Tx_msg_sgp_init,MSG_SIZE+OFFSET_OF_1, DEFAULT_TIMEOUT);
 }
 
 HAL_StatusTypeDef send_main_msg_humidity(double humidity, uint8_t MAIN_MSG_ID,UART_HandleTypeDef * uart ){
