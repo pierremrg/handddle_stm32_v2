@@ -201,6 +201,7 @@ bool relay_command = RELAY_ON;
 
 //Sytem
 bool system_on_off = SYSTEM_ON;
+uint8_t led_color_system_off = DARK;
 
 /* USER CODE END 0 */
 
@@ -450,10 +451,12 @@ int main(void)
 		  }
 	  } else
 	  {
+//		  led_color_system_off = DARK; //no problem w/ the ligths if i add this variable
+
 		  set_cooling_fan_pwm(PWM_STOP, &htim2);
 		  set_heater_fan_pwm(PWM_STOP, &htim2);
 		  set_heater(false);
-		  set_lights(DARK);
+		  set_lights(led_color_system_off);
 		  set_relay_on(RELAY_OFF);
 	  }
 
