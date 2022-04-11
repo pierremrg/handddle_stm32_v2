@@ -83,7 +83,7 @@
 #define SHT40_BYTES_TO_TRANSMIT				1
 #define SHT40_BYTES_TO_RECEIVE				6
 
-//for SGP41
+//For SGP41
 #define SGP41_BYTES_TO_TRANSMIT				8
 #define SGP41_BYTES_TO_RECEIVE				6
 #define SGP41_MEASUREMENT_COMMAND			0x2619
@@ -92,5 +92,9 @@
 #define SGP41_INIT_HUMIDITY					50
 #define SGP41_CONDITIONNING_TIME			10 		//in seconds
 #define SGP41_SRAW_FEEDING_TIME				180		//in seconds
+
+// For relay
+#define RELAY_ON							true
+#define RELAY_OFF							false
 
 #endif /* ADDITIONAL_FEATURES_DEFINES_H_ */

@@ -40,7 +40,6 @@ void send_cmd_nok(UART_HandleTypeDef * uart){
 	HAL_UART_Transmit(uart, msg_ack_cmd, MSG_SIZE + 1, DEFAULT_TIMEOUT);
 }
 
-
 void parser_cmd_udpate_watchdog(uint8_t * rx_buff, UART_HandleTypeDef * uart){
 	watchdog_update = true;
 }
@@ -82,6 +81,16 @@ void parser_cmd_door(uint8_t * rx_buff,UART_HandleTypeDef * uart)
 	if((data == CLOSED || data == OPENED) && (MSG_HEADER_UID_1_TYPOLOGY == TYPE_MACHINE_ROOF || MSG_HEADER_UID_1_TYPOLOGY == TYPE_POST_TREATMENT))
 	{
 		door_command = data;
+	}
+}
+
+void parser_cmd_relay(uint8_t * rx_buff, UART_HandleTypeDef * uart)
+{
+	uint8_t data = rx_buff[DATA];
+
+	if((data == RELAY_ON || data == RELAY_OFF) && (MSG_HEADER_UID_1_TYPOLOGY == TYPE_MACHINE_RACK || MSG_HEADER_UID_1_TYPOLOGY == TYPE_POST_TREATMENT))
+	{
+		relay_command = data;
 	}
 }
 
@@ -196,6 +205,10 @@ void parser_cmd(uint8_t * rx_buff, UART_HandleTypeDef * uart){
 	case CMD_SOUND_MODULE_SIMPLE_CMD:
 		send_cmd_ack(uart);
 		parser_cmd_sound_module_simple_command(rx_buff, uart);
+		break;
+	case CMD_RELAY:
+		send_cmd_ack(uart);
+		parser_cmd_relay(rx_buff, uart);
 		break;
 	default:
 		send_cmd_nok(uart);

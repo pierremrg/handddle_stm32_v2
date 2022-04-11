@@ -35,6 +35,8 @@ bool door_state;
 
 uint8_t desired_temperature;
 
+bool relay_command;
+
 
 /** @def CMD_ACK
  *  @brief Message ID for the ack when it's a command message
@@ -66,10 +68,20 @@ uint8_t desired_temperature;
  */
 #define CMD_LIGHT_COLOR 							0x05
 
+/** @def CMD_ON_OFF
+ *  @brief Command ID to put the system in standby mode
+ */
+#define CMD_ON_OFF		 							0x06
+
 /** @def CMD_DOOR
  *  @brief Command ID to lock or unlock the door
  */
 #define CMD_DOOR									0x07
+
+/** @def CMD_RELAY
+ *  @brief Command ID to activate or deactivate the relay
+ */
+#define CMD_RELAY									0x0A
 
 /** @def CMD_SOUND_MODULE_VOLUME
  *  @brief Command ID to modify the volume
@@ -138,6 +150,13 @@ void parser_cmd_led_color(uint8_t * rx_buff,UART_HandleTypeDef * uart);
  *	@param	uart Uart strcture used to the communication with the Jetson Nano. If the cable used is the ST-Link, huart2
  */
 void parser_cmd_door(uint8_t * rx_buff, UART_HandleTypeDef * uart);
+
+/*	@fn 	void parser_cmd_relay(uint8_t * rx_buff,UART_HandleTypeDef * uart)
+ *	@brief 	Function used to activate or deactivate the relay
+ *	@param	rx_buff Pointer to the array tab containing the message received
+ *	@param	uart Uart strcture used to the communication with the Jetson Nano. If the cable used is the ST-Link, huart2
+ */
+void parser_cmd_relay(uint8_t * rx_buff, UART_HandleTypeDef * uart);
 
 /*	@fn 	void parser_cmd_sound_module_simple_command(uint8_t * rx_buff, UART_HandleTypeDef * uart)
  * 	@brief 	Function used to parse the command value to select the right sound module function

@@ -90,4 +90,7 @@ typedef struct {
 
 } struct_VN;
 
+//For relay
+bool relay_command;
+
 #endif /* ADDITIONAL_FEATURES_EXTERN_VARIABLES_H_ */

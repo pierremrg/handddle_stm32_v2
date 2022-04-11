@@ -39,6 +39,7 @@
 #include "../../Lib/Inc/pressure.h"
 #include "../../Lib/Inc/thermistor.h"
 #include "../../Lib/Inc/gas_index_algorithm.h"
+#include "../../Lib/Inc/relay.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -195,6 +196,9 @@ uint8_t sgp41_timer_init = 0;
 uint8_t sgp41_timer_feeding = 0;
 bool sgp41_tick = true;
 
+//relay
+bool relay_command = RELAY_ON;
+
 /* USER CODE END 0 */
 
 /**
@@ -315,6 +319,9 @@ int main(void)
   GasIndexAlgorithm_init(&params_voc, GasIndexAlgorithm_ALGORITHM_TYPE_VOC);
   GasIndexAlgorithm_init(&params_nox, GasIndexAlgorithm_ALGORITHM_TYPE_NOX);
 
+  //relay : default always activate
+  set_relay_on(relay_command);
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -415,6 +422,7 @@ int main(void)
 		  heater_activated = false;
 		  pwm_heater_fan = PWM_HEATER_10;
 	  }
+	  set_relay_on(relay_command);
 
 
 	  /*
@@ -484,6 +492,9 @@ int main(void)
 			  send_main_msg_nox(nox_index_value, &huart2);
 			  send_main_msg_voc(voc_index_value, &huart2);
 		  }
+
+		  //Relay
+		  send_main_msg_relay(relay_command, &huart2);
 	  }
 
 	  /*
@@ -1187,7 +1198,7 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOD_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(DOOR_CMD_GPIO_Port, DOOR_CMD_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOC, RELAY_Pin|DOOR_CMD_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(HEATER_GPIO_Port, HEATER_Pin, GPIO_PIN_RESET);
@@ -1204,12 +1215,12 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(DOOR_LEFT_LATCH_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : DOOR_CMD_Pin */
-  GPIO_InitStruct.Pin = DOOR_CMD_Pin;
+  /*Configure GPIO pins : RELAY_Pin DOOR_CMD_Pin */
+  GPIO_InitStruct.Pin = RELAY_Pin|DOOR_CMD_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(DOOR_CMD_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
   /*Configure GPIO pin : HEATER_Pin */
   GPIO_InitStruct.Pin = HEATER_Pin;

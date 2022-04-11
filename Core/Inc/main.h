@@ -84,6 +84,8 @@ void Error_Handler(void);
 #define WHITE_LIGHT_GPIO_Port GPIOB
 #define TACHY_COOLING_FAN_Pin GPIO_PIN_6
 #define TACHY_COOLING_FAN_GPIO_Port GPIOC
+#define RELAY_Pin GPIO_PIN_9
+#define RELAY_GPIO_Port GPIOC
 #define SMART_SENSOR_2_SCL_Pin GPIO_PIN_8
 #define SMART_SENSOR_2_SCL_GPIO_Port GPIOA
 #define BLUE_LIGHT_Pin GPIO_PIN_9
