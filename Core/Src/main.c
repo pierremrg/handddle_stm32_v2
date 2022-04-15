@@ -365,7 +365,7 @@ int main(void)
 		  set_door_lock(door_command);
 		  if(MSG_HEADER_UID_1_TYPOLOGY == TYPE_MACHINE_ROOF || MSG_HEADER_UID_1_TYPOLOGY == TYPE_POST_TREATMENT) door_cycle(true);
 
-		  if(desired_temperature >= DESIRED_TEMP_MIN && desired_temperature <= DESIRED_TEMP_MAX && door_state == CLOSED)
+		  if(heater_activated && desired_temperature >= DESIRED_TEMP_MIN && desired_temperature <= DESIRED_TEMP_MAX && door_state == CLOSED)
 		  {
 			  set_temperature(desired_temperature, temp_humi_SP.temperature, temp_humi_SS_1.temperature);
 		  } else

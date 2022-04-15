@@ -61,6 +61,7 @@ void parser_cmd_cooling_fan(uint8_t * rx_buff,UART_HandleTypeDef * uart)
 void parser_cmd_heater_temperature(uint8_t * rx_buff,UART_HandleTypeDef * uart)
 {
 	uint8_t data = rx_buff[DATA];
+	heater_activated = true;
 	desired_temperature = data;
 }
 
