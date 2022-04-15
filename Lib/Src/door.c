@@ -89,8 +89,6 @@ void door_cycle(bool door_cycle_on)
 			pwm_heater_fan = PWM_STOP;
 		}
 
-		static_light = true;
-
 	} else if(door_closure)
 	{
 		door_closure = false;
@@ -117,6 +115,7 @@ void door_cycle(bool door_cycle_on)
 	{
 		door_state = OPENED;
 		led_color = WHITE;
+		static_light = true;
 
 		left_latch_error = false;
 		right_latch_error = false;

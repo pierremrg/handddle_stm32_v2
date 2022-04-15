@@ -69,15 +69,18 @@ void parser_cmd_led_color(uint8_t * rx_buff,UART_HandleTypeDef * uart)
 {
 	uint8_t data = rx_buff[DATA];
 
-	if(data >= LIGHT_COLOR_MIN_INDEX && data <= LIGHT_COLOR_MAX_INDEX)
+	if(door_state == CLOSED)
 	{
-		static_light = true;
-		led_color = data;
-	} else if(data >= LIGHT_COLOR_MIN_INDEX + FADE_OFFSET
-			&& data <= LIGHT_COLOR_MAX_INDEX + FADE_OFFSET)
-	{
-		static_light = false;
-		led_color = data - FADE_OFFSET;
+		if(data >= LIGHT_COLOR_MIN_INDEX && data <= LIGHT_COLOR_MAX_INDEX)
+		{
+			static_light = true;
+			led_color = data;
+		} else if(data >= LIGHT_COLOR_MIN_INDEX + FADE_OFFSET
+				&& data <= LIGHT_COLOR_MAX_INDEX + FADE_OFFSET)
+		{
+			static_light = false;
+			led_color = data - FADE_OFFSET;
+		}
 	}
 }
 
