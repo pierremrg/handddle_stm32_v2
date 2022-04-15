@@ -74,6 +74,8 @@ void door_cycle(bool door_cycle_on)
 
 		previous_pwm_cooling_fan = pwm_cooling_fan;
 		previous_pwm_heater_fan = pwm_heater_fan;
+		previous_static_light = static_light;
+
 
 		if(MSG_HEADER_UID_1_TYPOLOGY == TYPE_MACHINE_ROOF)
 		{
@@ -85,6 +87,7 @@ void door_cycle(bool door_cycle_on)
 			pwm_heater_fan = PWM_STOP;
 		}
 
+		static_light = true;
 
 	} else if(door_closure)
 	{
@@ -104,6 +107,7 @@ void door_cycle(bool door_cycle_on)
 			pwm_cooling_fan = previous_pwm_cooling_fan;
 			pwm_heater_fan = previous_pwm_heater_fan;
 			led_color = previous_led_color;
+			static_light = previous_static_light;
 		}
 	}
 
@@ -124,14 +128,9 @@ void door_cycle(bool door_cycle_on)
 		left_latch_error = false;
 		right_latch_error = false;
 
-		if(var_timer_7_tick != ZERO && MSG_HEADER_UID_1_TYPOLOGY == TYPE_MACHINE_ROOF)
+		if(var_timer_7_tick != ZERO && (MSG_HEADER_UID_1_TYPOLOGY == TYPE_MACHINE_ROOF
+				|| MSG_HEADER_UID_1_TYPOLOGY == TYPE_POST_TREATMENT))
 		{
-			var_timer_7_tick = ZERO;
-		}
-
-		if(var_timer_7_tick == EXTRACTION_TIME_AFTER_DOOR_OPENED && MSG_HEADER_UID_1_TYPOLOGY == TYPE_POST_TREATMENT)
-		{
-			pwm_cooling_fan = PWM_STOP;
 			var_timer_7_tick = ZERO;
 		}
 	} else {

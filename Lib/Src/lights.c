@@ -6,80 +6,171 @@
  */
 #include "../Inc/lights.h"
 
+
+//FADE
+int pwm = ZERO, token = ZERO;
+
 int percentage(int value, int perc)
 {
 	int return_value;
-	if(perc != 0) return_value = (perc * value) / 100;
+	if(perc != ZERO) return_value = (perc * value) / CONST_PERCENT;
 	return return_value;
 }
 
 void fade(int color)
 {
-	//FADE
-	int pwm = 0, tokenB = 0;
+	switch (color) {
+		case WHITE_PT:
+			htim1.Instance -> CCR4 = ZERO;
+			htim1.Instance -> CCR3 = ZERO;
+			htim1.Instance -> CCR2 = ZERO;
+			htim12.Instance -> CCR1 = percentage(WHITE_PT_W_CONST, pwm);
 
-	if(color == BLUE_HANDDDLE && pwm<=100)
-	{
-		if(tokenB == ZERO)
-		{
-			htim1.Instance -> CCR4 = percentage(14, pwm);
-			htim1.Instance -> CCR3 = percentage(90, pwm);
-			htim1.Instance -> CCR2 = percentage(45, pwm);
-			htim12.Instance -> CCR1 = 0;
-			pwm++;
-			if(pwm == 100){tokenB=1;}
-		}
-		else if(pwm>0 && tokenB == 1)
-		{
-			htim1.Instance -> CCR4 = percentage(14, pwm);
-			htim1.Instance -> CCR3 = percentage(90, pwm);
-			htim1.Instance -> CCR2 = percentage(45, pwm);
-			htim12.Instance -> CCR1 = 0;
-			pwm--;
-			if(pwm == 1){color = BLUE_HANDDDLE; tokenB = 0; pwm=0;}
-		}
-	}
-	else if(color == ORANGE && pwm<=100)
-	{
-		if(tokenB == 0)
-		{
-			htim1.Instance -> CCR4 = percentage(100, pwm);
-			htim1.Instance -> CCR3 = percentage(40, pwm);
-			htim1.Instance -> CCR2 = 0;
-			htim12.Instance -> CCR1 = 0;
-			pwm++;
-			if(pwm == 100){tokenB=1;}
-		}
-		else if(pwm>0 && tokenB == 1)
-		{
-			htim1.Instance -> CCR4 = percentage(100, pwm);
-			htim1.Instance -> CCR3 = percentage(40, pwm);
-			htim1.Instance -> CCR2 = 0;
-			htim12.Instance -> CCR1 = 0;
-			pwm--;
-			if(pwm == 5){color = 1; tokenB = ORANGE; pwm=0;}
-		}
-	}
-	else if(color == WHITE && pwm<=100)
-	{
-		if(tokenB == 0)
-		{
-			htim1.Instance -> CCR4 = 0;
-			htim1.Instance -> CCR3 = 0;
-			htim1.Instance -> CCR2 = 0;
-			htim12.Instance -> CCR1 = percentage(100, pwm);
-			pwm++;
-			if(pwm == 100){tokenB=1;}
-		}
-		else if(pwm>0 && tokenB == 1)
-		{
-			htim1.Instance -> CCR4 = 0;
-			htim1.Instance -> CCR3 = 0;
-			htim1.Instance -> CCR2 = 0;
-			htim12.Instance -> CCR1 = percentage(100, pwm);
-			pwm--;
-			if(pwm == 5){color = WHITE; tokenB = 0; pwm=0;}
-		}
+			if(pwm <= MAX_PWM_FADE)
+			{
+				if(token == ZERO)
+				{
+					pwm += ONE;
+					if(pwm == MAX_PWM_FADE) token = ONE;
+				}
+				else if(pwm > MIN_PWM_FADE && token == ONE)
+				{
+					pwm -= ONE;
+					if(pwm == MIN_PWM_FADE) token = ZERO;
+				}
+			}
+			break;
+
+		case RED:
+			htim1.Instance -> CCR4 = percentage(RED_R_CONST, pwm);
+			htim1.Instance -> CCR3 = ZERO;
+			htim1.Instance -> CCR2 = ZERO;
+			htim12.Instance -> CCR1 = ZERO;
+
+			if(pwm <= MAX_PWM_FADE)
+			{
+				if(token == ZERO)
+				{
+					pwm += ONE;
+					if(pwm == MAX_PWM_FADE) token = ONE;
+				}
+				else if(pwm > MIN_PWM_FADE && token == ONE)
+				{
+					pwm -= ONE;
+					if(pwm == MIN_PWM_FADE) token = ZERO;
+				}
+			}
+			break;
+
+		case GREEN:
+			htim1.Instance -> CCR4 = ZERO;
+			htim1.Instance -> CCR3 = percentage(GREEN_G_CONST, pwm);
+			htim1.Instance -> CCR2 = ZERO;
+			htim12.Instance -> CCR1 = ZERO;
+
+			if(pwm <= MAX_PWM_FADE)
+			{
+				if(token == ZERO)
+				{
+					pwm += ONE;
+					if(pwm == MAX_PWM_FADE)
+					{
+						token = ONE;
+					}
+				}
+				else if(pwm > MIN_PWM_FADE && token == ONE)
+				{
+					pwm -= ONE;
+
+					if(pwm == MIN_PWM_FADE) token = ZERO;
+				}
+			}
+			break;
+
+		case ORANGE:
+			htim1.Instance -> CCR4 = percentage(ORANGE_R_CONST, pwm);
+			htim1.Instance -> CCR3 = percentage(ORANGE_G_CONST, pwm);
+			htim1.Instance -> CCR2 = ZERO;
+			htim12.Instance -> CCR1 = ZERO;
+
+			if(pwm <= MAX_PWM_FADE)
+			{
+				if(token == ZERO)
+				{
+					pwm += ONE;
+					if(pwm == MAX_PWM_FADE) token = ONE;
+				}
+				else if(pwm > MIN_PWM_FADE && token == ONE)
+				{
+					pwm -= ONE;
+
+					if(pwm == MIN_PWM_FADE) token = ZERO;
+				}
+			}
+			break;
+
+		case BLUE:
+			htim1.Instance -> CCR4 = ZERO;
+			htim1.Instance -> CCR3 = ZERO;
+			htim1.Instance -> CCR2 = percentage(BLUE_B_CONST, pwm);
+			htim12.Instance -> CCR1 = ZERO;
+
+			if(pwm <= MAX_PWM_FADE)
+			{
+				if(token == ZERO)
+				{
+					pwm += ONE;
+					if(pwm == MAX_PWM_FADE) token= ONE;
+				}
+				else if(pwm > MIN_PWM_FADE && token == ONE)
+				{
+					pwm -= ONE;
+					if(pwm == MIN_PWM_FADE) token = ZERO;
+				}
+			}
+			break;
+
+		case BLUE_HANDDDLE:
+			htim1.Instance -> CCR4 = ZERO;
+			htim1.Instance -> CCR3 = percentage(BLUE_HANDDDLE_G_CONST, pwm);
+			htim1.Instance -> CCR2 = percentage(BLUE_HANDDDLE_B_CONST, pwm);
+			htim12.Instance -> CCR1 = ZERO;
+
+			if(pwm <= MAX_PWM_FADE)
+			{
+				if(token == ZERO)
+				{
+					pwm += ONE;
+					if(pwm == MAX_PWM_FADE) token= ONE;
+				}
+				else if(pwm > MIN_PWM_FADE && token == ONE)
+				{
+					pwm -= ONE;
+					if(pwm == MIN_PWM_FADE) token = ZERO;
+				}
+			}
+			break;
+
+		case WHITE:
+			htim1.Instance -> CCR4 = ZERO;
+			htim1.Instance -> CCR3 = ZERO;
+			htim1.Instance -> CCR2 = ZERO;
+			htim12.Instance -> CCR1 = percentage(WHITE_W_CONST, pwm);
+
+			if(pwm <= MAX_PWM_FADE)
+			{
+				if(token == ZERO)
+				{
+					pwm += ONE;
+					if(pwm == MAX_PWM_FADE) token= ONE;
+				}
+				else if(pwm > MIN_PWM_FADE && token == ONE)
+				{
+					pwm -= ONE;
+					if(pwm == MIN_PWM_FADE) token = ZERO;
+				}
+			}
+			break;
 	}
 }
 
@@ -90,179 +181,59 @@ void set_lights(int color)
 	{
 		//Color : White
 	    case WHITE:
-	    	htim1.Instance->CCR4 = 0; //Modulation
-	    	htim1.Instance->CCR3 = 0; //Modulation
-	    	htim1.Instance->CCR2 = 0; //Modulation
-	    	htim12.Instance->CCR1 = 100; //Modulation
+	    	htim1.Instance->CCR4 = ZERO; //Modulation
+	    	htim1.Instance->CCR3 = ZERO; //Modulation
+	    	htim1.Instance->CCR2 = ZERO; //Modulation
+	    	htim12.Instance->CCR1 = WHITE_W_CONST; //Modulation
 	    	break;
 
 	    case WHITE_PT:
-	    	htim1.Instance->CCR4 = 0; //Modulation
-	    	htim1.Instance->CCR3 = 0; //Modulation
-	    	htim1.Instance->CCR2 = 0; //Modulation
-	    	htim12.Instance->CCR1 = 50; //Modulation
+	    	htim1.Instance->CCR4 = ZERO; //Modulation
+	    	htim1.Instance->CCR3 = ZERO; //Modulation
+	    	htim1.Instance->CCR2 = ZERO; //Modulation
+	    	htim12.Instance->CCR1 = WHITE_PT_W_CONST; //Modulation
 	    	break;
 
 	    case RED:
-	    	htim1.Instance->CCR4 = 100; //Modulation
-	    	htim1.Instance->CCR3 = 0; //Modulation
-	    	htim1.Instance->CCR2 = 0; //Modulation
-	    	htim12.Instance->CCR1 = 0; //Modulation
+	    	htim1.Instance->CCR4 = RED_R_CONST; //Modulation
+	    	htim1.Instance->CCR3 = ZERO; //Modulation
+	    	htim1.Instance->CCR2 = ZERO; //Modulation
+	    	htim12.Instance->CCR1 = ZERO; //Modulation
 	    	break;
 
 	    case GREEN:
-	    	htim1.Instance->CCR4 = 0; //Modulation
-	    	htim1.Instance->CCR3 = 100; //Modulation
-	    	htim1.Instance->CCR2 = 0; //Modulation
-	    	htim12.Instance->CCR1 = 0; //Modulation
+	    	htim1.Instance->CCR4 = ZERO; //Modulation
+	    	htim1.Instance->CCR3 = GREEN_G_CONST; //Modulation
+	    	htim1.Instance->CCR2 = ZERO; //Modulation
+	    	htim12.Instance->CCR1 = ZERO; //Modulation
 	    	break;
 
 	    case BLUE:
-	    	htim1.Instance->CCR4 = 0; //Modulation
-	    	htim1.Instance->CCR3 = 0; //Modulation
-	    	htim1.Instance->CCR2 = 100; //Modulation
-	    	htim12.Instance->CCR1 = 0; //Modulation
+	    	htim1.Instance->CCR4 = ZERO; //Modulation
+	    	htim1.Instance->CCR3 = ZERO; //Modulation
+	    	htim1.Instance->CCR2 = BLUE_B_CONST; //Modulation
+	    	htim12.Instance->CCR1 = ZERO; //Modulation
 	    	break;
 
 	    case BLUE_HANDDDLE:
-	    	htim1.Instance->CCR4 = 0; //Modulation  		14
-	    	htim1.Instance->CCR3 = 79; //Modulation 		90
-	    	htim1.Instance->CCR2 = 75; //Modulation 		45
-	    	htim12.Instance->CCR1 = 0; //Modulation			0
+	    	htim1.Instance->CCR4 = ZERO; //Modulation  		14
+	    	htim1.Instance->CCR3 = BLUE_HANDDDLE_G_CONST; //Modulation 		90
+	    	htim1.Instance->CCR2 = BLUE_HANDDDLE_B_CONST; //Modulation 		45
+	    	htim12.Instance->CCR1 = ZERO; //Modulation			ZERO
 	    	break;
 
 	    case DARK:
-	    	htim1.Instance->CCR4 = 0; //Modulation
-	    	htim1.Instance->CCR3 = 0; //Modulation
-	    	htim1.Instance->CCR2 = 0; //Modulation
-	    	htim12.Instance->CCR1 = 0; //Modulation
+	    	htim1.Instance->CCR4 = ZERO; //Modulation
+	    	htim1.Instance->CCR3 = ZERO; //Modulation
+	    	htim1.Instance->CCR2 = ZERO; //Modulation
+	    	htim12.Instance->CCR1 = ZERO; //Modulation
 	    	break;
 
 	    case ORANGE:
-	    	htim1.Instance->CCR4 = 100; //Modulation
-	    	htim1.Instance->CCR3 = 40; //Modulation
-	    	htim1.Instance->CCR2 = 0; //Modulation
-	    	htim12.Instance->CCR1 = 0; //Modulation
+	    	htim1.Instance->CCR4 = ORANGE_R_CONST; //Modulation
+	    	htim1.Instance->CCR3 = ORANGE_G_CONST; //Modulation
+	    	htim1.Instance->CCR2 = ZERO; //Modulation
+	    	htim12.Instance->CCR1 = ZERO; //Modulation
 	    	break;
-	}
-}
-
-void fadeB(int color)
-{
-	switch(color)
-	{
-		case RED:
-			for(int pwm=0; pwm<100; pwm++)
-			{
-				htim1.Instance -> CCR4 = percentage(100, pwm);
-				htim1.Instance -> CCR3 = 0;
-				htim1.Instance -> CCR2 = 0;
-				htim12.Instance -> CCR1 = 0;
-				HAL_Delay(20);
-			}
-			for(int pwm=100; pwm>0; pwm--)
-			{
-				htim1.Instance -> CCR4 = percentage(100, pwm);
-				htim1.Instance -> CCR3 = 0;
-				htim1.Instance -> CCR2 = 0;
-				htim12.Instance -> CCR1 = 0;
-				HAL_Delay(20);
-			}
-			break;
-
-		case GREEN:
-			for(int pwm=0; pwm<100; pwm++)
-			{
-				htim1.Instance -> CCR4 = 0;
-				htim1.Instance -> CCR3 = percentage(100, pwm);
-				htim1.Instance -> CCR2 = 0;
-				htim12.Instance -> CCR1 = 0;
-				HAL_Delay(20);
-			}
-			for(int pwm=100; pwm>0; pwm--)
-			{
-				htim1.Instance -> CCR4 = 0;
-				htim1.Instance -> CCR3 = percentage(100, pwm);
-				htim1.Instance -> CCR2 = 0;
-				htim12.Instance -> CCR1 = 0;
-				HAL_Delay(20);
-			}
-			break;
-
-		case BLUE_HANDDDLE:
-			for(int pwm=0; pwm<100; pwm++)
-			{
-				htim1.Instance -> CCR4 = percentage(14, pwm);
-				htim1.Instance -> CCR3 = percentage(90, pwm);
-				htim1.Instance -> CCR2 = percentage(45, pwm);
-				htim12.Instance -> CCR1 = 0;
-				HAL_Delay(20);
-			}
-			for(int pwm=100; pwm>0; pwm--)
-			{
-				htim1.Instance -> CCR4 = percentage(14, pwm);
-				htim1.Instance -> CCR3 = percentage(90, pwm);
-				htim1.Instance -> CCR2 = percentage(45, pwm);
-				htim12.Instance -> CCR1 = 0;
-				HAL_Delay(20);
-			}
-			break;
-
-		case WHITE:
-			for(int pwm=0; pwm<100; pwm++)
-			{
-				htim1.Instance -> CCR4 = 0;
-				htim1.Instance -> CCR3 = 0;
-				htim1.Instance -> CCR2 = 0;
-				htim12.Instance -> CCR1 = percentage(100, pwm);
-				HAL_Delay(20);
-			}
-			for(int pwm=100; pwm>0; pwm--)
-			{
-				htim1.Instance -> CCR4 = 0;
-				htim1.Instance -> CCR3 = 0;
-				htim1.Instance -> CCR2 = 0;
-				htim12.Instance -> CCR1 = percentage(100, pwm);
-				HAL_Delay(20);
-			}
-			break;
-
-		case WHITE_PT:
-			for(int pwm=0; pwm<100; pwm++)
-			{
-				htim1.Instance -> CCR4 = 0;
-				htim1.Instance -> CCR3 = 0;
-				htim1.Instance -> CCR2 = 0;
-				htim12.Instance -> CCR1 = percentage(50, pwm);
-				HAL_Delay(20);
-			}
-			for(int pwm=100; pwm>0; pwm--)
-			{
-				htim1.Instance -> CCR4 = 0;
-				htim1.Instance -> CCR3 = 0;
-				htim1.Instance -> CCR2 = 0;
-				htim12.Instance -> CCR1 = percentage(50, pwm);
-				HAL_Delay(20);
-			}
-			break;
-
-		case ORANGE:
-			for(int pwm=0; pwm<100; pwm++)
-			{
-				htim1.Instance -> CCR4 = percentage(100, pwm);
-				htim1.Instance -> CCR3 = percentage(40, pwm);
-				htim1.Instance -> CCR2 = 0;
-				htim12.Instance -> CCR1 = 0;
-				HAL_Delay(20);
-			}
-			for(int pwm=100; pwm>0; pwm--)
-			{
-				htim1.Instance -> CCR4 = percentage(100, pwm);
-				htim1.Instance -> CCR3 = percentage(40, pwm);
-				htim1.Instance -> CCR2 = 0;
-				htim12.Instance -> CCR1 = 0;
-				HAL_Delay(20);
-			}
-			break;
 	}
 }

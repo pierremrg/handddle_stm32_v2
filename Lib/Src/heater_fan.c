@@ -55,12 +55,12 @@ void set_temperature(uint8_t desired_temp, float smart_power_temperature, float 
 	{
 		if((desired_temp - average_temperature) > DELTA_INERTIA)
 		{
-			pwm_heater_fan = PWM_HEATER_80;
+			pwm_heater_fan = PWM_HEATER_90;
 			heater_activated = true;
 			pwm_cooling_fan = PWM_STOP;
 		} else
 		{
-			pwm_heater_fan = PWM_HEATER_10;
+			pwm_heater_fan = PWM_HEATER_30;
 			heater_activated = false;
 			pwm_cooling_fan = PWM_STOP;
 		}
@@ -69,12 +69,12 @@ void set_temperature(uint8_t desired_temp, float smart_power_temperature, float 
 		if((average_temperature - desired_temp) > DELTA_INERTIA)
 		{
 			pwm_cooling_fan = PWM_COOLING_100;
-			pwm_heater_fan = PWM_HEATER_10;
+			pwm_heater_fan = PWM_HEATER_30;
 			heater_activated = false;
 		} else
 		{
 			pwm_cooling_fan = PWM_COOLING_30;
-			pwm_heater_fan = PWM_HEATER_10;
+			pwm_heater_fan = PWM_HEATER_30;
 			heater_activated = false;
 		}
 	}

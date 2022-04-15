@@ -36,6 +36,9 @@ extern TIM_HandleTypeDef htim3;
 extern uint8_t led_color;
 extern TIM_HandleTypeDef htim1;
 extern TIM_HandleTypeDef htim12;
+extern bool static_light;
+extern bool previous_static_light;
+extern bool fade_on;
 
 //For sound module
 extern bool sm_next;

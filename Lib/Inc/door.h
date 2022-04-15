@@ -13,6 +13,8 @@ uint8_t pwm_cooling_fan;
 uint8_t pwm_heater_fan;
 uint8_t previous_led_color;
 uint8_t led_color;
+bool previous_static_light;
+bool static_light;
 bool door_state;
 bool door_init;
 

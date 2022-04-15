@@ -55,6 +55,11 @@
  */
 #define MAIN_MSG_TEMPERATURE_SS_2 0x09
 
+/*  @def MAIN_MSG_DOOR_STATE
+ *  @brief Main message ID for the door state main message (from SMART SENSOR 2)
+ */
+#define MAIN_MSG_DOOR_STATE 0x0D
+
 /*  @def MAIN_MSG_PRESSURE
  *  @brief Main message ID for the pressure main message
  */
@@ -119,3 +124,11 @@ HAL_StatusTypeDef send_main_msg_humidity(double humidity, uint8_t MAIN_MSG_ID, U
  * @return 	HAL_ERROR if something went wrong; HAL_OK if every went well
  */
 HAL_StatusTypeDef send_main_msg_pressure(uint16_t pressure, UART_HandleTypeDef * uart );
+
+/* @fn 		HAL_StatusTypeDef send_main_msg_door_state(uint8_t door_state, UART_HandleTypeDef * uart );
+ * @brief 	Function used to send the door state value message
+ * @param 	door_state is the value to be sent : send true (1) if the door is opened ; send false (0) if the door is closed
+ * @param 	uart Uart structure used to the communication with the Jetson Nano
+ * @return 	HAL_ERROR if something went wrong; HAL_OK if every went well
+ */
+HAL_StatusTypeDef send_main_msg_door_state(uint8_t door_state, UART_HandleTypeDef * uart );

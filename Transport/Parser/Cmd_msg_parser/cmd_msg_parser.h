@@ -37,6 +37,8 @@ uint8_t desired_temperature;
 
 bool relay_command;
 
+bool static_light;
+
 
 /** @def CMD_ACK
  *  @brief Message ID for the ack when it's a command message

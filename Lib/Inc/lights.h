@@ -15,20 +15,42 @@
 #define BLUE						6
 #define WHITE		 				7
 
+#define CONST_PERCENT				100
+
+#define WHITE_PT_W_CONST			50
+
+#define RED_R_CONST					100
+
+#define GREEN_G_CONST				100
+
+#define ORANGE_R_CONST				100
+#define ORANGE_G_CONST				40
+
+#define BLUE_HANDDDLE_G_CONST		85
+#define BLUE_HANDDDLE_B_CONST		65
+
+#define BLUE_B_CONST				100
+
+#define WHITE_W_CONST				100
+
+#define MAX_PWM_FADE				100
+#define MIN_PWM_FADE				5
+
 #ifndef INC_LIGHTS_H_
 #define INC_LIGHTS_H_
 
 /*	@fn 	void fade(int color);
  * 	@brief 	Function used to make a fade effect with the led
- * 	@param 	color is the color use to make the fade effect without blocking loop
+ * 	@param 	color is the color used to make the fade effect without blocking loop
+ * 	@param 	htim is the timer used to make the fade effect with the lights
+ */
+void apply_color(int color, TIM_HandleTypeDef* htim);
+
+/*	@fn 	void fade(int color);
+ * 	@brief 	Function used to make a fade effect with the led
+ * 	@param 	color is the color used to make the fade effect without blocking loop
  */
 void fade(int color);
-
-/*	@fn 	void fadeB(int color);
- * 	@brief 	Function used to make a fade effect with the led
- * 	@param 	color is the color use to make the fade effect with blocking loop
- */
-void fadeB(int color);
 
 /*	@fn 	int percentage(int value, int perc);
  * 	@brief 	Function used to converte the input value (0-255) to percentage value for the pwm

@@ -43,6 +43,7 @@
 // For light color
 #define LIGHT_COLOR_MIN_INDEX				0
 #define LIGHT_COLOR_MAX_INDEX				7
+#define FADE_OFFSET							10
 
 // For sound module
 #define SOUND_MODULE_MIN_VOLUME 			0
@@ -58,7 +59,6 @@
 #define UNLOCKED							false
 #define LOCKED								true
 #define LATCH_ERROR							2
-#define EXTRACTION_TIME_AFTER_DOOR_OPENED	180
 
 // For pressure
 #define ADC_12_BIT 							4096.0 // 2^12
@@ -75,8 +75,8 @@
 
 //For heater temperature
 #define DELTA_INERTIA						0.5
-#define PWM_HEATER_80						80
-#define PWM_HEATER_10						10
+#define PWM_HEATER_90						90
+#define PWM_HEATER_30						30
 #define PWM_COOLING_100						100
 #define PWM_COOLING_30						30
 #define DESIRED_TEMP_MIN					10

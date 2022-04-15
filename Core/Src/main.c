@@ -68,6 +68,7 @@ TIM_HandleTypeDef htim1;
 TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim3;
 TIM_HandleTypeDef htim4;
+TIM_HandleTypeDef htim5;
 TIM_HandleTypeDef htim7;
 TIM_HandleTypeDef htim9;
 TIM_HandleTypeDef htim12;
@@ -95,6 +96,7 @@ static void MX_I2C1_Init(void);
 static void MX_TIM9_Init(void);
 static void MX_I2C2_Init(void);
 static void MX_I2C3_Init(void);
+static void MX_TIM5_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -115,8 +117,6 @@ bool var_toggle = false;
 
 // Variable used to be increment at each tick of timer 4 (main)
 uint64_t var_timer_4_tick = 0;
-// Variable used to be increment at each tick of timer 7 (door)
-uint64_t var_timer_7_tick = 0;
 // Variable used to be true at each tick of timer 9 (50ms)
 bool var_timer_9_tick = 0;
 
@@ -134,6 +134,9 @@ int cooling_rpm;// for PWM of fans
 uint8_t led_color = 0;
 uint8_t previous_led_color = 0;
 uint8_t led_color_buffer = 0;
+bool fade_on = false;
+bool previous_fade_on = false;
+bool static_light = true;
 
 //sound module
 //extern
@@ -249,6 +252,7 @@ int main(void)
   MX_TIM9_Init();
   MX_I2C2_Init();
   MX_I2C3_Init();
+  MX_TIM5_Init();
   /* USER CODE BEGIN 2 */
 
   /*     SMART LIGHT    */
@@ -271,6 +275,9 @@ int main(void)
 
   // Main timer ticks each second
   HAL_TIM_Base_Start_IT(&htim4);
+
+  // Main timer ticks each 10ms
+  HAL_TIM_Base_Start_IT(&htim5);
 
   // Timer ticks each 50ms (i2c)
 //  HAL_TIM_Base_Start_IT(&htim9);
@@ -329,6 +336,7 @@ int main(void)
   //relay : default always activate
   set_relay_on(relay_command);
 
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -346,7 +354,12 @@ int main(void)
 		  set_cooling_fan_pwm(pwm_cooling_fan, &htim2);
 		  set_heater_fan_pwm(pwm_heater_fan, &htim2);
 		  set_heater(heater_activated);
-		  set_lights(led_color);
+		  if(static_light) set_lights(led_color);
+		  else if(!static_light && fade_on)
+		  {
+			  fade_on = false;
+			  fade(led_color);
+		  }
 		  set_door_lock(door_command);
 		  if(MSG_HEADER_UID_1_TYPOLOGY == TYPE_MACHINE_ROOF || MSG_HEADER_UID_1_TYPOLOGY == TYPE_POST_TREATMENT) door_cycle(true);
 
@@ -356,7 +369,7 @@ int main(void)
 		  } else
 		  {
 			  heater_activated = false;
-			  pwm_heater_fan = PWM_HEATER_10;
+			  pwm_heater_fan = PWM_HEATER_30;
 		  }
 		  set_relay_on(relay_command);
 
@@ -1054,6 +1067,51 @@ static void MX_TIM4_Init(void)
 }
 
 /**
+  * @brief TIM5 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM5_Init(void)
+{
+
+  /* USER CODE BEGIN TIM5_Init 0 */
+
+  /* USER CODE END TIM5_Init 0 */
+
+  TIM_ClockConfigTypeDef sClockSourceConfig = {0};
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+
+  /* USER CODE BEGIN TIM5_Init 1 */
+
+  /* USER CODE END TIM5_Init 1 */
+  htim5.Instance = TIM5;
+  htim5.Init.Prescaler = 20-1;
+  htim5.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim5.Init.Period = 10000-1;
+  htim5.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  htim5.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim5) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
+  if (HAL_TIM_ConfigClockSource(&htim5, &sClockSourceConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim5, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM5_Init 2 */
+
+  /* USER CODE END TIM5_Init 2 */
+
+}
+
+/**
   * @brief TIM7 Initialization Function
   * @param None
   * @retval None
@@ -1325,11 +1383,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		var_timer_4_tick += 1;
 	}
 
-
-	//each second : DOOR
-	if(htim->Instance == TIM7)
+	//each 10ms : lights
+	if(htim->Instance == TIM5 && !static_light)
 	{
-		var_timer_7_tick += 1;
+		fade_on = true;
 	}
 
 	//each 50ms : I2C
