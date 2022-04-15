@@ -48,8 +48,10 @@ uint8_t get_latches_state(void)
 		latches = PRESENT;
 	else if((right_latch == NOT_PRESENT) && (left_latch == NOT_PRESENT))
 		latches = NOT_PRESENT;
-	else
-		latches = LATCH_ERROR;
+	else if((right_latch == PRESENT) && (left_latch == NOT_PRESENT))
+		latches = LEFT_LATCH_ERROR;
+	else if((right_latch == NOT_PRESENT) && (left_latch == PRESENT))
+		latches = RIGHT_LATCH_ERROR;
 
 
 	return latches;
@@ -133,8 +135,9 @@ void door_cycle(bool door_cycle_on)
 		{
 			var_timer_7_tick = ZERO;
 		}
-	} else {
+	} else if (latches_state == LEFT_LATCH_ERROR) {
 		left_latch_error = true;
+	} else if (latches_state == RIGHT_LATCH_ERROR) {
 		right_latch_error = true;
 	}
 

@@ -58,7 +58,8 @@
 #define CLOSED								false
 #define UNLOCKED							false
 #define LOCKED								true
-#define LATCH_ERROR							2
+#define LEFT_LATCH_ERROR					2
+#define RIGHT_LATCH_ERROR					3
 
 // For pressure
 #define ADC_12_BIT 							4096.0 // 2^12

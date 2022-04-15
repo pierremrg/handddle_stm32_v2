@@ -117,6 +117,8 @@ bool var_toggle = false;
 
 // Variable used to be increment at each tick of timer 4 (main)
 uint64_t var_timer_4_tick = 0;
+// Variable used to be increment at each tick of timer 7 (door)
+uint64_t var_timer_7_tick = 0;
 // Variable used to be true at each tick of timer 9 (50ms)
 bool var_timer_9_tick = 0;
 
@@ -1381,6 +1383,13 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		if(sgp41_timer_init < SGP41_CONDITIONNING_TIME) sgp41_tick = true;
 
 		var_timer_4_tick += 1;
+	}
+
+
+	//each second : DOOR
+	if(htim->Instance == TIM7)
+	{
+		var_timer_7_tick += 1;
 	}
 
 	//each 10ms : lights
