@@ -62,6 +62,10 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define V_OUT_EE_Pin GPIO_PIN_2
+#define V_OUT_EE_GPIO_Port GPIOC
+#define V_OUT_PLUG_Pin GPIO_PIN_3
+#define V_OUT_PLUG_GPIO_Port GPIOC
 #define THERMISTOR_Pin GPIO_PIN_0
 #define THERMISTOR_GPIO_Port GPIOA
 #define USART_TX_Pin GPIO_PIN_2
@@ -102,8 +106,8 @@ void Error_Handler(void);
 #define DFPlayer_RX_GPIO_Port GPIOD
 #define SMART_SENSOR_1_SDA_Pin GPIO_PIN_3
 #define SMART_SENSOR_1_SDA_GPIO_Port GPIOB
-#define SMART_SENSOR_3_SDA_Pin GPIO_PIN_4
-#define SMART_SENSOR_3_SDA_GPIO_Port GPIOB
+#define SMART_SENSOR_2_SDA_Pin GPIO_PIN_4
+#define SMART_SENSOR_2_SDA_GPIO_Port GPIOB
 #define SMART_POWER_SCL_Pin GPIO_PIN_6
 #define SMART_POWER_SCL_GPIO_Port GPIOB
 #define SMART_POWER_SDA_Pin GPIO_PIN_7

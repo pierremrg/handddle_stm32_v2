@@ -17,6 +17,8 @@
 
 #define SGP41_ADDRESS							0x59
 
+#define SEN5X_ADDRESS							0x69
+
 
 //Enumerate index of elements of SHT40 buffer array
 typedef enum {
@@ -37,7 +39,6 @@ typedef enum {
 
     SGP41_COMMAND_FIRST_BYTE 		= 0,
 	SGP41_COMMAND_SECOND_BYTE 		= 1,
-
 
 	SGP41_HUMIDITY_FIRST_BYTE 		= 2,
 	SGP41_HUMIDITY_SECOND_BYTE 		= 3,
@@ -64,19 +65,70 @@ typedef enum {
 
 } sgp41_index_buffer_array;
 
+//Enumerate index of elements of SEN5X command array
+typedef enum {
+
+	SEN5X_COMMAND_START_MEASUREMENT = 0x0021,
+
+	SEN5X_COMMAND_READ_ALL_VALUES   = 0x03C4,
+
+	SEN5X_FIRST_BYTE_COMMAND    	= 0,
+	SEN5X_SECOND_BYTE_COMMAND   	= 1,
+
+
+} sen5x_index_cmd_array;
+
+//Enumerate index of elements of SEN5X command array
+typedef enum {
+
+	SEN5X_PM1_FIRST_BYTE			= 0,
+	SEN5X_PM1_SECOND_BYTE  			= 1,
+	SEN5X_PM1_CRC_BYTE  			= 2,
+
+	SEN5X_PM2_5_FIRST_BYTE 			= 3,
+	SEN5X_PM2_5_SECOND_BYTE 		= 4,
+	SEN5X_PM2_5_CRC_BYTE 			= 5,
+
+	SEN5X_PM4_FIRST_BYTE 			= 6,
+	SEN5X_PM4_SECOND_BYTE 			= 7,
+	SEN5X_PM4_CRC_BYTE 				= 8,
+
+	SEN5X_PM10_FIRST_BYTE 			= 9,
+	SEN5X_PM10_SECOND_BYTE 			= 10,
+	SEN5X_PM10_CRC_BYTE 			= 11,
+
+	SEN5X_TEMPERATURE_FIRST_BYTE 	= 12,
+	SEN5X_TEMPERATURE_SECOND_BYTE 	= 13,
+	SEN5X_TEMPERATURE_CRC_BYTE 		= 14,
+
+	SEN5X_HUMIDITY_FIRST_BYTE 		= 15,
+	SEN5X_HUMIDITY_SECOND_BYTE 		= 16,
+	SEN5X_HUMIDITY_CRC_BYTE 		= 17,
+
+	SEN5X_VOC_INDEX_FIRST_BYTE 		= 18,
+	SEN5X_VOC_INDEX_SECOND_BYTE 	= 19,
+	SEN5X_VOC_INDEX_CRC_BYTE 		= 20,
+
+	SEN5X_NOX_INDEX_FIRST_BYTE 		= 21,
+	SEN5X_NOX_INDEX_SECOND_BYTE 	= 22,
+	SEN5X_NOX_INDEX_CRC_BYTE 		= 23,
+
+} sen5x_index_buffer_array;
+
+
 /*
  * @brief  	This function is used to collect Temperature & Humidity with the SHT40.
  * @param	hi2c_x is the i2c channel which we send the frame
  * @retval 	return an HAL_StatusTypeDef variable to know if we can communicate with the SHT40
  */
-HAL_StatusTypeDef write_frame_temp_humi_SHT40(I2C_HandleTypeDef *hi2c_x);
+HAL_StatusTypeDef write_frame_temp_humi_sht40(I2C_HandleTypeDef *hi2c_x);
 
 /*
  * @brief  	This function is used to send an UART frame to the SHT40.
  * @param	hi2c_x is the i2c channel which we send the frame
  * @retval 	return a Struct_TH variable to get the temperature and the humidity rate
  */
-Struct_TH read_temp_humi_SHT40(I2C_HandleTypeDef *hi2c_x);
+struct_sht40 read_temp_humi_sht40(I2C_HandleTypeDef *hi2c_x);
 
 /*
  * @brief  	This function is used to calculate the checksum of a data according to sensirion's datasheet
@@ -111,8 +163,23 @@ HAL_StatusTypeDef sgp41_send_command(I2C_HandleTypeDef *hi2c, uint16_t command, 
 /*
  * @brief  	This function is used to get i2c values from the sgp41
  * @param	hi2c is the i2c channel which we communicate
- * @retval 	return a struct_VN variable to get the NOx and VOC index
+ * @retval 	return a struct_sgp41 variable to get the NOx and VOC index
  */
-struct_VN sgp41_receive_raw_datas(I2C_HandleTypeDef *hi2c);
+struct_sgp41 sgp41_receive_raw_datas(I2C_HandleTypeDef *hi2c);
+
+/*
+ * @brief  	This function is used to collect datas from with the SEN5X sensor.
+ * @param	hi2c_x is the i2c channel which we send the frame
+ * @param 	command is the command ID to send to the sen5x
+ * @retval 	return an HAL_StatusTypeDef variable to know if we can communicate with the sensor
+ */
+HAL_StatusTypeDef write_frame_sen5x(I2C_HandleTypeDef *hi2c_x, uint16_t command);
+
+/*
+ * @brief  	This function is used to send an UART frame to the SEN5X.
+ * @param	hi2c_x is the i2c channel which we send the frame
+ * @retval 	return a struct_sen5x variable to get all datas from the sensor
+ */
+struct_sen5x read_datas_sen5x(I2C_HandleTypeDef *hi2c_x);
 
 #endif /* INC_I2C_H_ */

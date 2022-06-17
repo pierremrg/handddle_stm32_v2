@@ -1,4 +1,4 @@
-/* Handddle
+ /* Handddle
  * Communication module
  * 2022
  */

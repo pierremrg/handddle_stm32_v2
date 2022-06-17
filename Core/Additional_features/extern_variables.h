@@ -72,7 +72,7 @@ typedef struct i2C1_temp_humi {
 	float temperature;
 	float humidity;
 	bool error_status;
-} Struct_TH;
+} struct_sht40;
 
 //Smart Sensor 1
 extern I2C_HandleTypeDef hi2c2;
@@ -89,7 +89,22 @@ typedef struct {
 	uint8_t	cmd_init[SGP41_BYTES_TO_TRANSMIT];
 	bool error_status; // 0 or 1
 
-} struct_VN;
+} struct_sgp41;
+
+//For SEN5X
+typedef struct {
+
+	float pm1;
+	float pm2_5;
+	float pm4;
+	float pm10;
+	float temperature;
+	float humidity;
+	float voc_index;
+	float nox_index;
+	bool error_status; // 0 or 1
+
+} struct_sen5x;
 
 //For relay
 bool relay_command;

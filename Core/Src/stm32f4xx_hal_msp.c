@@ -98,11 +98,19 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef* hadc)
     /* Peripheral clock enable */
     __HAL_RCC_ADC1_CLK_ENABLE();
 
+    __HAL_RCC_GPIOC_CLK_ENABLE();
     __HAL_RCC_GPIOA_CLK_ENABLE();
     /**ADC1 GPIO Configuration
+    PC2     ------> ADC1_IN12
+    PC3     ------> ADC1_IN13
     PA0-WKUP     ------> ADC1_IN0
     PA4     ------> ADC1_IN4
     */
+    GPIO_InitStruct.Pin = V_OUT_EE_Pin|V_OUT_PLUG_Pin;
+    GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
     GPIO_InitStruct.Pin = THERMISTOR_Pin|PRESSURE_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
@@ -132,9 +140,13 @@ void HAL_ADC_MspDeInit(ADC_HandleTypeDef* hadc)
     __HAL_RCC_ADC1_CLK_DISABLE();
 
     /**ADC1 GPIO Configuration
+    PC2     ------> ADC1_IN12
+    PC3     ------> ADC1_IN13
     PA0-WKUP     ------> ADC1_IN0
     PA4     ------> ADC1_IN4
     */
+    HAL_GPIO_DeInit(GPIOC, V_OUT_EE_Pin|V_OUT_PLUG_Pin);
+
     HAL_GPIO_DeInit(GPIOA, THERMISTOR_Pin|PRESSURE_Pin);
 
   /* USER CODE BEGIN ADC1_MspDeInit 1 */
@@ -220,12 +232,12 @@ void HAL_I2C_MspInit(I2C_HandleTypeDef* hi2c)
     GPIO_InitStruct.Alternate = GPIO_AF4_I2C3;
     HAL_GPIO_Init(SMART_SENSOR_2_SCL_GPIO_Port, &GPIO_InitStruct);
 
-    GPIO_InitStruct.Pin = SMART_SENSOR_3_SDA_Pin;
+    GPIO_InitStruct.Pin = SMART_SENSOR_2_SDA_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_AF_OD;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
     GPIO_InitStruct.Alternate = GPIO_AF4_I2C3;
-    HAL_GPIO_Init(SMART_SENSOR_3_SDA_GPIO_Port, &GPIO_InitStruct);
+    HAL_GPIO_Init(SMART_SENSOR_2_SDA_GPIO_Port, &GPIO_InitStruct);
 
     /* Peripheral clock enable */
     __HAL_RCC_I2C3_CLK_ENABLE();
@@ -298,7 +310,7 @@ void HAL_I2C_MspDeInit(I2C_HandleTypeDef* hi2c)
     */
     HAL_GPIO_DeInit(SMART_SENSOR_2_SCL_GPIO_Port, SMART_SENSOR_2_SCL_Pin);
 
-    HAL_GPIO_DeInit(SMART_SENSOR_3_SDA_GPIO_Port, SMART_SENSOR_3_SDA_Pin);
+    HAL_GPIO_DeInit(SMART_SENSOR_2_SDA_GPIO_Port, SMART_SENSOR_2_SDA_Pin);
 
   /* USER CODE BEGIN I2C3_MspDeInit 1 */
 
@@ -356,6 +368,20 @@ void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* htim_base)
   /* USER CODE BEGIN TIM5_MspInit 1 */
 
   /* USER CODE END TIM5_MspInit 1 */
+  }
+  else if(htim_base->Instance==TIM6)
+  {
+  /* USER CODE BEGIN TIM6_MspInit 0 */
+
+  /* USER CODE END TIM6_MspInit 0 */
+    /* Peripheral clock enable */
+    __HAL_RCC_TIM6_CLK_ENABLE();
+    /* TIM6 interrupt Init */
+    HAL_NVIC_SetPriority(TIM6_DAC_IRQn, 0, 0);
+    HAL_NVIC_EnableIRQ(TIM6_DAC_IRQn);
+  /* USER CODE BEGIN TIM6_MspInit 1 */
+
+  /* USER CODE END TIM6_MspInit 1 */
   }
   else if(htim_base->Instance==TIM7)
   {
@@ -593,6 +619,20 @@ void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef* htim_base)
   /* USER CODE BEGIN TIM5_MspDeInit 1 */
 
   /* USER CODE END TIM5_MspDeInit 1 */
+  }
+  else if(htim_base->Instance==TIM6)
+  {
+  /* USER CODE BEGIN TIM6_MspDeInit 0 */
+
+  /* USER CODE END TIM6_MspDeInit 0 */
+    /* Peripheral clock disable */
+    __HAL_RCC_TIM6_CLK_DISABLE();
+
+    /* TIM6 interrupt DeInit */
+    HAL_NVIC_DisableIRQ(TIM6_DAC_IRQn);
+  /* USER CODE BEGIN TIM6_MspDeInit 1 */
+
+  /* USER CODE END TIM6_MspDeInit 1 */
   }
   else if(htim_base->Instance==TIM7)
   {

@@ -35,7 +35,7 @@ HAL_StatusTypeDef send_sec_msg_ee_temperature(float temp, UART_HandleTypeDef * u
 		MSG_LENGTH_FIRST_BYTE, MSG_LENGTH_2_SECOND_BYTE // Length
 	}; // 12 first bytes
 
-	uint16_t double_temp = temp * MULTIPLIER_FACTOR_100;
+	uint16_t double_temp = temp * MULTIPLIER_FACTOR_10;
 	Tx_msg_air_ee_temperature[DATA] = double_temp >> BYTE_OFFSET; // takes two bytes because it's a uint16_t value
 	Tx_msg_air_ee_temperature[DATA + ONE] = double_temp;
 

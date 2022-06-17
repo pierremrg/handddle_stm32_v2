@@ -55,15 +55,60 @@
  */
 #define MAIN_MSG_TEMPERATURE_SS_2 0x09
 
-/*  @def MAIN_MSG_DOOR_STATE
- *  @brief Main message ID for the door state main message (from SMART SENSOR 2)
+/*  @def 	MAIN_MSG_HUMIDITY_SEN5X
+ *  @brief 	Main message ID for the humidity main message (from SEN5X sensor)
  */
-#define MAIN_MSG_DOOR_STATE 0x0D
+#define MAIN_MSG_HUMIDITY_SEN5X 0x0A
+
+/*  @def MAIN_MSG_TEMPERATURE_SEN5X
+ *  @brief Main message ID for the temperature main message (from SEN5X sensor)
+ */
+#define MAIN_MSG_TEMPERATURE_SEN5X 0x0B
+
+/*  @def MAIN_MSG_VOC_INDEX_SEN5X
+ *  @brief Main message ID for the voc index main message (from SEN5X sensor)
+ */
+#define MAIN_MSG_VOC_INDEX_SEN5X 0x0C
+
+/*  @def MAIN_MSG_NOX_INDEX_SEN5X
+ *  @brief Main message ID for the nox index main message (from SEN5X sensor)
+ */
+#define MAIN_MSG_NOX_INDEX_SEN5X 0x0D
+
+/*  @def MAIN_MSG_WEIGHT
+ *  @brief Main message ID for the weight main message
+ */
+#define MAIN_MSG_WEIGHT 0x0E
 
 /*  @def MAIN_MSG_PRESSURE
  *  @brief Main message ID for the pressure main message
  */
 #define MAIN_MSG_PRESSURE	0x0F
+
+/*  @def MAIN_MSG_DOOR_STATE
+ *  @brief Main message ID for the door state main message
+ */
+#define MAIN_MSG_DOOR_STATE 0x10
+
+/*  @def MAIN_MSG_PM1
+ *  @brief Main message ID for the pm1 main message
+ */
+#define MAIN_MSG_PM1	0x11
+
+/*  @def MAIN_MSG_PM2_5
+ *  @brief Main message ID for the pm2_5 main message
+ */
+#define MAIN_MSG_PM2_5	0x12
+
+/*  @def MAIN_MSG_PM4
+ *  @brief Main message ID for the pm4 main message
+ */
+#define MAIN_MSG_PM4	0x13
+
+/*  @def MAIN_MSG_PM10
+ *  @brief Main message ID for the pm10 main message
+ */
+#define MAIN_MSG_PM10	0x14
 
 /* @fn 		HAL_StatusTypeDef send_main_msg_led_color(uint8_t light_color,UART_HandleTypeDef * uart )
  * @brief 	Function used to send the light color value message
@@ -97,15 +142,15 @@ HAL_StatusTypeDef send_main_msg_nox(uint16_t nox,UART_HandleTypeDef * uart );
  */
 HAL_StatusTypeDef send_main_msg_voc(uint16_t voc,UART_HandleTypeDef * uart );
 
-/* @fn 		HAL_StatusTypeDef send_main_msg_temperature(double temperature, uint8_t MAIN_MSG_ID, UART_HandleTypeDef * uart );
+/* @fn 		HAL_StatusTypeDef send_main_msg_temperature(float temperature, uint8_t MAIN_MSG_ID, UART_HandleTypeDef * uart );
  * @brief 	Function used to send the temperature value message
- * @note	temperature is a double, because it's a float value
+ * @note	temperature is a float value
  * @param 	temperature is the value to be sent
  * @param	main_msg_id is the id of the message
  * @param 	uart Uart structure used to the communication with the Jetson Nano
  * @return 	HAL_ERROR if something went wrong; HAL_OK if every went well
  */
-HAL_StatusTypeDef send_main_msg_temperature(double temperature, uint8_t MAIN_MSG_ID, UART_HandleTypeDef * uart );
+HAL_StatusTypeDef send_main_msg_temperature(float temperature, uint8_t MAIN_MSG_ID, UART_HandleTypeDef * uart );
 
 /* @fn 		HAL_StatusTypeDef send_main_msg_humidity(double humidity, uint8_t MAIN_MSG_ID, UART_HandleTypeDef * uart );
  * @brief 	Function used to send the temperature value message
@@ -132,3 +177,35 @@ HAL_StatusTypeDef send_main_msg_pressure(uint16_t pressure, UART_HandleTypeDef *
  * @return 	HAL_ERROR if something went wrong; HAL_OK if every went well
  */
 HAL_StatusTypeDef send_main_msg_door_state(uint8_t door_state, UART_HandleTypeDef * uart );
+
+/* @fn 		HAL_StatusTypeDef send_main_msg_pm1(float pm1, UART_HandleTypeDef * uart );
+ * @brief 	Function used to send the pm1 value message
+ * @param 	pm1 is the value to be sent
+ * @param 	uart Uart structure used to the communication with the Jetson Nano
+ * @return 	HAL_ERROR if something went wrong; HAL_OK if every went well
+ */
+HAL_StatusTypeDef send_main_msg_pm1(float pm1, UART_HandleTypeDef * uart );
+
+/* @fn 		HAL_StatusTypeDef send_main_msg_pm2_5(float pm2_5, UART_HandleTypeDef * uart );
+ * @brief 	Function used to send the pm2_5 value message
+ * @param 	pm2_5 is the value to be sent
+ * @param 	uart Uart structure used to the communication with the Jetson Nano
+ * @return 	HAL_ERROR if something went wrong; HAL_OK if every went well
+ */
+HAL_StatusTypeDef send_main_msg_pm2_5(float pm2_5, UART_HandleTypeDef * uart );
+
+/* @fn 		HAL_StatusTypeDef send_main_msg_pm4(float pm4, UART_HandleTypeDef * uart );
+ * @brief 	Function used to send the pm4 value message
+ * @param 	pm4 is the value to be sent
+ * @param 	uart Uart structure used to the communication with the Jetson Nano
+ * @return 	HAL_ERROR if something went wrong; HAL_OK if every went well
+ */
+HAL_StatusTypeDef send_main_msg_pm4(float pm4, UART_HandleTypeDef * uart );
+
+/* @fn 		HAL_StatusTypeDef send_main_msg_pm10(float pm10, UART_HandleTypeDef * uart );
+ * @brief 	Function used to send the pm1 value message
+ * @param 	pm10 is the value to be sent
+ * @param 	uart Uart structure used to the communication with the Jetson Nano
+ * @return 	HAL_ERROR if something went wrong; HAL_OK if every went well
+ */
+HAL_StatusTypeDef send_main_msg_pm10(float pm10, UART_HandleTypeDef * uart );

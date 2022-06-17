@@ -28,6 +28,7 @@
 #define OFFSET_OF_1							1
 #define OFFSET_OF_2							2
 #define MULTIPLIER_FACTOR_100				100 // For 2-byte values to send
+#define MULTIPLIER_FACTOR_10				10 // For 2-byte values to send
 
 
 // For fans
@@ -54,8 +55,8 @@
 // For door
 #define PRESENT								1
 #define NOT_PRESENT							0
-#define OPENED								true
-#define CLOSED								false
+#define OPENED								0
+#define CLOSED								1
 #define UNLOCKED							false
 #define LOCKED								true
 #define LEFT_LATCH_ERROR					2
@@ -68,14 +69,14 @@
 #define SECOND_CONST_150					150
 
 //For Smart Power
-#define FIRST_CONST_175						175
-#define SECOND_CONST_65535					65535
-#define THIRD_CONST_45						45
-#define FOURTH_CONST_125					125
-#define FIFTH_CONST_6						6
+#define FIRST_CONST_175						175.0
+#define SECOND_CONST_65535					65535.0
+#define THIRD_CONST_45						45.0
+#define FOURTH_CONST_125					125.0
+#define FIFTH_CONST_6						6.0
 
 //For heater temperature
-#define DELTA_INERTIA						0.5
+#define DELTA_INERTIA						0.25
 #define PWM_HEATER_90						90
 #define PWM_HEATER_30						30
 #define PWM_COOLING_100						100
@@ -86,6 +87,10 @@
 //For SHT40
 #define SHT40_BYTES_TO_TRANSMIT				1
 #define SHT40_BYTES_TO_RECEIVE				6
+
+//For SEN5X
+#define SEN5X_BYTES_TO_TRANSMIT				2
+#define SEN5X_BYTES_TO_RECEIVE				23
 
 //For SGP41
 #define SGP41_BYTES_TO_TRANSMIT				8
@@ -100,5 +105,10 @@
 // For relay
 #define RELAY_ON							true
 #define RELAY_OFF							false
+
+//SEN5X
+#define SEN5X_POLLUTION_FACTOR				10.0
+#define SEN5X_TEMPERATURE_FACTOR			100.0
+#define SEN5X_HUMIDITY_FACTOR				200.0
 
 #endif /* ADDITIONAL_FEATURES_DEFINES_H_ */
