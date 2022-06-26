@@ -8,7 +8,7 @@
  * This value is hardcoded and never changed
  */
 
-#define TYPE_MACHINE_TOIT 			0xC1
+#define TYPE_MACHINE_ROOF 			0xC1
 #define TYPE_MACHINE_RACK 			0xC2
 #define TYPE_MP 		  			0xC3
 #define TYPE_POST_TREATMENT 		0xC4
